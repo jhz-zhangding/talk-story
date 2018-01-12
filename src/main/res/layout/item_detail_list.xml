@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    >
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginBottom="15dp"
+        android:layout_marginTop="15dp">
+
+        <co.songlcy.circleimage.view.CircleImage xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/item_image"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@mipmap/ic_launcher"
+            app:imgBorderColor="@android:color/holo_orange_dark"
+            app:imgBorderWidth="1dp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/item_image"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            >
+
+            <TextView
+                android:id="@+id/item_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="2"
+                android:text=""
+                android:textColor="#333333"
+                android:textSize="18sp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:orientation="horizontal">
+
+                <co.songlcy.circleimage.view.CircleImage xmlns:app="http://schemas.android.com/apk/res-auto"
+                    android:id="@+id/item_teach_image"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    app:imgBorderColor="@android:color/holo_orange_dark"
+                    app:imgBorderWidth="1dp" />
+
+                <TextView
+                    android:id="@+id/item_teach_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:textColor="#55333333"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/item_des"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:maxLines="1"
+                    android:textColor="#55333333"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+
+        <com.zhy.view.flowlayout.TagFlowLayout
+            android:id="@+id/item_grid_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="450dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            />
+    </RelativeLayout>
+
+</RelativeLayout>

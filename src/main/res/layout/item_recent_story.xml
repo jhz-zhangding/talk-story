@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    >
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/recent_story_image"
+            android:layout_width="wrap_content"
+            android:layout_height="250dp"
+            />
+        <co.songlcy.circleimage.view.CircleImage
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/recent_story_author_image"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            app:imgBorderWidth="1dp"
+            app:imgBorderColor="@android:color/holo_orange_dark"
+            android:layout_marginTop="210dp"
+            android:layout_marginLeft="55dp"
+            />
+
+        <TextView
+            android:id="@+id/recent_story_from"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/recent_story_author_image"
+            android:layout_below="@+id/recent_story_image"
+            android:layout_marginRight="50dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="5dp"
+            android:textColor="#999999"
+            android:text=""
+            android:textSize="16sp"
+            android:maxLines="1"
+            />
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/recent_story_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center"
+        android:minHeight="50dp"
+        android:maxWidth="250dp"
+        android:maxLines="2"
+        android:textColor="@color/base_text_color"
+        android:textSize="18sp"
+        android:text="还是空间的划分空间开房间"
+        />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/recent_story_double_language"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            />
+
+        <TextView
+            android:id="@+id/recent_story_single_language"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            />
+
+    </RelativeLayout>
+
+</LinearLayout>

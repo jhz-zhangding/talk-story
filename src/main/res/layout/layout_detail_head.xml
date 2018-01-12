@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/album_base_color"
+        android:minHeight="250dp"
+        android:layout_marginBottom="20dp"
+        >
+
+        <TextView
+            android:id="@+id/album_back_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginTop="20dp"
+            android:text="返回"
+            android:textColor="@color/black"
+            android:textSize="28sp" />
+
+        <ImageView
+            android:id="@+id/detail_image"
+            android:layout_width="170dp"
+            android:layout_height="170dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="80dp"
+            android:background="#D7D7D7" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/detail_image"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="50dp"
+            android:layout_toRightOf="@+id/detail_image"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/audio_detail_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="哈利波特血魔法英语第一季Season 1"
+                android:textColor="@color/base_text_color"
+                android:textSize="18sp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <co.songlcy.circleimage.view.CircleImage xmlns:app="http://schemas.android.com/apk/res-auto"
+                    android:id="@+id/item_teach_image"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    app:imgBorderColor="@android:color/holo_orange_dark"
+                    app:imgBorderWidth="1dp" />
+
+                <TextView
+                    android:id="@+id/audio_detail_author_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:text="CoCo姐姐"
+                    android:textColor="@color/base_text_color"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/audio_detail_list_num"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="26个故事"
+                android:textColor="@color/base_text_color"
+                android:textSize="18sp" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</LinearLayout>
