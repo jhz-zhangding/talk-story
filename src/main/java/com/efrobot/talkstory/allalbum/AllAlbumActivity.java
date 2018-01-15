@@ -1,18 +1,26 @@
 package com.efrobot.talkstory.allalbum;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.efrobot.library.mvp.utils.L;
 import com.efrobot.talkstory.R;
 import com.efrobot.talkstory.adapter.AlbumAdapter;
+import com.efrobot.talkstory.albumdetail.AlbumDetailActivity;
 import com.efrobot.talkstory.base.BaseActivity;
 import com.efrobot.talkstory.base.WithPlayerBaseActivity;
 import com.efrobot.talkstory.bean.AlbumBean;
 import com.efrobot.talkstory.bean.AlbumItemBean;
+import com.efrobot.talkstory.bean.AudiaItemBean;
 import com.efrobot.talkstory.http.HttpParamUtils;
 import com.efrobot.talkstory.http.HttpUtils;
+import com.efrobot.talkstory.search.SearchPageActivity;
 import com.google.gson.Gson;
 import com.jingchen.pulltorefresh.PullToRefreshLayout;
 
@@ -22,9 +30,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class AllAlbumActivity extends WithPlayerBaseActivity implements PullToRefreshLayout.OnPullListener {
+public class AllAlbumActivity extends WithPlayerBaseActivity implements PullToRefreshLayout.OnPullListener, View.OnClickListener {
 
     private PullToRefreshLayout refreshView;
+
+    private EditText searchEt;
+    private TextView startSearchBtn;
 
     private GridView gridView;
 
@@ -53,20 +64,17 @@ public class AllAlbumActivity extends WithPlayerBaseActivity implements PullToRe
         getHttpData();
     }
 
-    @Override
-    public void onRefresh(PullToRefreshLayout pullToRefreshLayout) {
-        //下拉刷新
-        page = 0;
-        getHttpData();
-        pullToRefreshLayout.refreshFinish(PullToRefreshLayout.SUCCEED);
+    protected void initView() {
+        refreshView = (PullToRefreshLayout) findViewById(R.id.refresh_view);
+        gridView = (GridView) findViewById(R.id.all_album_grid_view);
+
+        searchEt = (EditText) findViewById(R.id.main_search_edit);
+        startSearchBtn = (TextView) findViewById(R.id.main_search_edit_btn);
+
+        refreshView.setOnPullListener(this);
+        startSearchBtn.setOnClickListener(this);
     }
 
-    @Override
-    public void onLoadMore(PullToRefreshLayout pullToRefreshLayout) {
-        //上拉加载
-        getHttpData();
-        pullToRefreshLayout.refreshFinish(PullToRefreshLayout.SUCCEED);
-    }
 
     private void getHttpData() {
         Map<String, Object> map = HttpParamUtils.getAlbumParamMap(page, size, keyword, tagId);
@@ -100,14 +108,22 @@ public class AllAlbumActivity extends WithPlayerBaseActivity implements PullToRe
 
             }
         });
-
     }
 
-    protected void initView() {
-        refreshView = (PullToRefreshLayout) findViewById(R.id.refresh_view);
-        gridView = (GridView) findViewById(R.id.all_album_grid_view);
+    @Override
+    public void onRefresh(PullToRefreshLayout pullToRefreshLayout) {
+        //下拉刷新
+        page = 1;
+        list.clear();
+        getHttpData();
+        pullToRefreshLayout.refreshFinish(PullToRefreshLayout.SUCCEED);
+    }
 
-        refreshView.setOnPullListener(this);
+    @Override
+    public void onLoadMore(PullToRefreshLayout pullToRefreshLayout) {
+        //上拉加载
+        getHttpData();
+        pullToRefreshLayout.refreshFinish(PullToRefreshLayout.SUCCEED);
     }
 
     private void setAdapterData() {
@@ -120,7 +136,27 @@ public class AllAlbumActivity extends WithPlayerBaseActivity implements PullToRe
     }
 
     protected void initListener() {
-
+        gridView.setOnItemClickListener(onItemClickListener);
     }
 
+    private AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            if (list != null && list.size() > 0) {
+                Intent intent = new Intent(getContext(), AlbumDetailActivity.class);
+                intent.putExtra("id", list.get(i).getId());
+                startActivity(intent);
+            }
+        }
+    };
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.main_search_edit_btn:
+                String keyword = searchEt.getText().toString();
+                SearchPageActivity.openSearchActivity(getContext(), SearchPageActivity.class, keyword);
+                break;
+        }
+    }
 }

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -23,6 +25,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,7 +35,9 @@ import com.efrobot.talkstory.adapter.PopupWindowAdapter;
 import com.efrobot.talkstory.bean.HistoryBean;
 import com.efrobot.talkstory.db.HistoryManager;
 import com.efrobot.talkstory.env.Constants;
+import com.efrobot.talkstory.utils.PopupOrderPriceDetail;
 import com.efrobot.talkstory.utils.TimeUtils;
+import com.efrobot.talkstory.utils.VerticalSeekBar;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.List;
@@ -41,7 +46,8 @@ public abstract class WithPlayerBaseActivity extends Activity {
 
     public TalkStoryApplication application;
 
-    private PopupWindow popupWindow;
+    private PopupOrderPriceDetail popupWindow;
+    private PopupOrderPriceDetail volumePopupWindow;
     private PopupWindowAdapter popupWindowAdapter;
     public List<HistoryBean> historyBeanList;
 
@@ -51,6 +57,9 @@ public abstract class WithPlayerBaseActivity extends Activity {
     private ProgressBar progressBar;
     private TextView currentPlayTimeTv, totalPlayTimeTv;
     private ImageView playModeImg, playHistoryImg, playVolumImg;
+
+    public AudioManager audiomanage;
+    private int maxVolume, currentVolume;
 
     @Override
     protected void onResume() {
@@ -71,6 +80,8 @@ public abstract class WithPlayerBaseActivity extends Activity {
 
         application = TalkStoryApplication.from(this);
 
+        audiomanage = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+
         historyBeanList = HistoryManager.getInstance(this).queryAllContent();
 
         FrameLayout view = (FrameLayout) findViewById(R.id.frame_layout);
@@ -78,7 +89,6 @@ public abstract class WithPlayerBaseActivity extends Activity {
         view.addView(childView);
 
         initPlayView();
-        initPopupWindowView();
 
         initView();
         initListener();
@@ -141,11 +151,13 @@ public abstract class WithPlayerBaseActivity extends Activity {
                     break;
                 case R.id.play_history:
                     //历史
-                    showOnTopPopupWindow(view);
+                    showPopupWindowView();
+                    mHandle.sendEmptyMessageDelayed(HIDE_NAVIGATION_VIEW, 1000);
                     break;
                 case R.id.play_volume:
                     //音量
-
+                    showVolumePopupWindow();
+                    mHandle.sendEmptyMessageDelayed(HIDE_NAVIGATION_VIEW, 1000);
                     break;
             }
         }
@@ -167,44 +179,62 @@ public abstract class WithPlayerBaseActivity extends Activity {
     int measuredWidth;
     int measuredHeight;
 
-    private void initPopupWindowView() {
+    private void showPopupWindowView() {
         contentView = LayoutInflater.from(this).inflate(R.layout.popup_history_lauout, null);
-
-        contentView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-        measuredWidth = contentView.getMeasuredWidth();
-        measuredHeight = contentView.getMeasuredHeight();
-
-        popupWindow = new PopupWindow(contentView, getResources().getDisplayMetrics().widthPixels
-                , getResources().getDisplayMetrics().heightPixels);
-        popupWindow.setTouchable(true);
-        popupWindow.setOutsideTouchable(true);
-        popupWindow.setBackgroundDrawable(new BitmapDrawable(getResources(), (Bitmap) null));
-        popupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-
+        popupWindow = new PopupOrderPriceDetail(this, contentView);
         ListView listView = (ListView) contentView.findViewById(R.id.pop_list_view);
         popupWindowAdapter = new PopupWindowAdapter(this, historyBeanList, 1);
         listView.setAdapter(popupWindowAdapter);
+        popupWindow.showUp(playHistoryImg);
     }
 
-    private void showOnTopPopupWindow(View view) {
-        historyBeanList = HistoryManager.getInstance(this).queryAllContent();
-        if (popupWindowAdapter != null) {
-            popupWindowAdapter.notifyDataSetChanged();
-        }
 
-        popupWindow.getContentView().measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-        int popupWidth = popupWindow.getContentView().getMeasuredWidth();    //  获取测量后的宽度
-        int popupHeight = popupWindow.getContentView().getMeasuredHeight();  //获取测量后的高度
-        int[] location = new int[2];
+    private VerticalSeekBar verticalSeekBar;
 
-        view.getLocationOnScreen(location);
-        popupWindow.showAtLocation(view, Gravity.NO_GRAVITY, location[0] + view.getWidth() / 2, location[1] - measuredHeight);
+    View volumeLayout;
 
-        hideBottomUIMenu();
+    private void showVolumePopupWindow() {
+        volumeLayout = LayoutInflater.from(this).inflate(R.layout.vertical_volum_layout, null);
+        verticalSeekBar = (VerticalSeekBar) volumeLayout.findViewById(R.id.volume_seekbar);
+
+        maxVolume = audiomanage.getStreamMaxVolume(AudioManager.STREAM_MUSIC);  //获取系统最大音量
+        verticalSeekBar.setMax(maxVolume);   //拖动条最高值与系统最大声匹配
+        currentVolume = audiomanage.getStreamVolume(AudioManager.STREAM_MUSIC);  //获取当前值
+        verticalSeekBar.setProgress(currentVolume);
+
+        verticalSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() //调音监听器
+        {
+            public void onProgressChanged(SeekBar arg0,int progress,boolean fromUser)
+            {
+                audiomanage.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0);
+                currentVolume = audiomanage.getStreamVolume(AudioManager.STREAM_MUSIC);  //获取当前值
+                verticalSeekBar.setProgress(currentVolume);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+
+            }
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+
+
+            }
+        });
+
+        volumeLayout.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        measuredWidth = verticalSeekBar.getMeasuredWidth();
+        measuredHeight = verticalSeekBar.getMeasuredHeight();
+
+        volumePopupWindow = new PopupOrderPriceDetail(this, volumeLayout);
+        volumePopupWindow.showUp(playVolumImg);
     }
 
 
     private final int UPDATE_SEEKBAR_VIEW = 1;
+    private final int HIDE_NAVIGATION_VIEW = 2;
 
     private boolean isPlay = true;
 
@@ -218,6 +248,9 @@ public abstract class WithPlayerBaseActivity extends Activity {
                         updateSeekBak();
                         sendEmptyMessageDelayed(UPDATE_SEEKBAR_VIEW, 200);
                     }
+                    break;
+                case HIDE_NAVIGATION_VIEW:
+                    hideBottomUIMenu();
                     break;
             }
         }
@@ -284,6 +317,29 @@ public abstract class WithPlayerBaseActivity extends Activity {
         getWindow().getDecorView().setSystemUiVisibility(uiFlags);
     }
 
+    /***
+     * 解决软键盘弹出时任务栏不隐藏和单击输入框以外区域输入法不隐藏的bug
+     */
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            View v = getCurrentFocus();
+            if (isShouldHideInput(v, ev)) {
+                setFullScreen();
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) {
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
+            }
+            return super.dispatchTouchEvent(ev);
+        }
+        // 必不可少，否则所有的组件都不会有TouchEvent了
+        if (getWindow().superDispatchTouchEvent(ev)) {
+            return true;
+        }
+        return onTouchEvent(ev);
+    }
+
     public boolean isShouldHideInput(View v, MotionEvent event) {
         if (v != null && (v instanceof EditText)) {
             int[] leftTop = {0, 0};
@@ -330,6 +386,15 @@ public abstract class WithPlayerBaseActivity extends Activity {
             if (action.equals(Constants.UPDATE_PLAYER_RECEIVER_ACTION)) {
                 updatePlayerView();
             }
+        }
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Constants.UPDATE_PROGRESS_RESULT) {
+            updatePlayerView();
         }
     }
 

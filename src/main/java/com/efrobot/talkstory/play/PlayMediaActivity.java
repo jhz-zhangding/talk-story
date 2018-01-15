@@ -139,6 +139,18 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
                 mSeekBar.setMax(currentTotalTime);
             }
 
+            //判断页面的播放内容是否和后台播放的一致
+            if (application.getCurrentPlayBean() != null) {
+                String id = application.getCurrentPlayBean().getAudioPath();
+                if (versionBean.getAudioUrl().equals(id)) {
+
+                } else {
+                    startPlay();
+                }
+
+                startUpdateSeekBar();
+            }
+
         }
 
     }
@@ -227,6 +239,18 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
 
     }
 
+    private void startPlay() {
+        if (application != null) {
+            if (application.mediaPlayService != null && application.mediaPlayService.mediaPlayer != null) {
+                if (versionBean != null) {
+                    application.mediaPlayService.startOtherVideo(versionBean.getAudioUrl());
+                }
+            } else {
+                application.startMediaService(this, versionBean.getAudioUrl());
+            }
+        }
+    }
+
     private void playOrPause() {
         if (application != null) {
             if (application.mediaPlayService != null && application.mediaPlayService.mediaPlayer != null) {
@@ -235,21 +259,21 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
                     mHandle.sendEmptyMessage(UPDATE_PLAY_BUTTON_STATE);
                 } else {
                     application.mediaPlayService.continueOrStart();
-                    startUpdateUI();
+                    startUpdateSeekBar();
                     mHandle.sendEmptyMessage(UPDATE_PAUSE_BUTTON_STATE);
                 }
             } else {
-                if (audiaItemBean.getVersions() != null && audiaItemBean.getVersions().size() > 0) {
+                if (versionBean != null) {
                     application.isPlayingStory = true;
-                    application.startMediaService(this, audiaItemBean.getVersions().get(0).getAudioUrl());
-                    startUpdateUI();
+                    application.startMediaService(this, versionBean.getAudioUrl());
+                    startUpdateSeekBar();
                     mHandle.sendEmptyMessage(UPDATE_PAUSE_BUTTON_STATE);
                 }
             }
         }
     }
 
-    private void startUpdateUI() {
+    private void startUpdateSeekBar() {
         if (mHandle.hasMessages(UPDATE_SEEKBAR_VIEW))
             mHandle.removeMessages(UPDATE_SEEKBAR_VIEW);
         mHandle.sendEmptyMessage(UPDATE_SEEKBAR_VIEW);
@@ -374,7 +398,7 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
     }
 
     private void finishThis() {
-        application.stopMediaService();
+//        application.stopMediaService();
         isPlay = false;
         mHandle.removeMessages(UPDATE_SEEKBAR_VIEW);
         mHandle.removeCallbacksAndMessages(null);

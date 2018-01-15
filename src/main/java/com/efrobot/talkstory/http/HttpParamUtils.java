@@ -8,7 +8,10 @@ public class HttpParamUtils {
     /**
      * POST URL
      */
-    //获取音频列表u
+    //获取听故事标签
+    public static String TAG_LIST_URL = "https://story-robot.dayutang.cn/story/tags";
+
+    //获取音频列表
     public static String AUDIO_LIST_URL = "https://story-robot.dayutang.cn/story/audio/list";
 
     //获取专辑列表
@@ -22,7 +25,6 @@ public class HttpParamUtils {
 
     //通过ID获取专辑
     public static String ALBUM_INFO_BY_ID_URL = "https://story-robot.dayutang.cn/story/album/%s";
-
 
 
     private static HttpParamUtils httpParamUtils;

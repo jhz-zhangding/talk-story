@@ -82,6 +82,15 @@ public class MediaPlayService extends Service implements CacheListener {
         }
     }
 
+    public void startOtherVideo(String url) {
+        this.VIDEO_URL = url;
+        if (mediaPlayer != null) {
+            mediaPlayer.reset();
+        }
+        startVideo();
+
+    }
+
     public void pause() {
         mediaPlayer.pause();
         application.isPlayingStory = false;

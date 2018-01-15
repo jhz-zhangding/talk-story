@@ -1,7 +1,6 @@
-package com.efrobot.talkstory.adapter;
+package com.efrobot.talkstory.search;
 
 import android.content.Context;
-import android.os.Build;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,31 +10,25 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.efrobot.talkstory.R;
-import com.efrobot.talkstory.bean.AlbumBean;
 import com.efrobot.talkstory.bean.AlbumItemBean;
 import com.efrobot.talkstory.utils.OptionsUtils;
-import com.efrobot.talkstory.utils.xUtilsImageUtils;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.imageaware.ImageAware;
 import com.nostra13.universalimageloader.core.imageaware.ImageViewAware;
-
-import org.xutils.image.ImageOptions;
-import org.xutils.x;
 
 import java.util.List;
 
 /**
  * Created by zd on 2017/12/22.
  */
-public class AlbumAdapter extends BaseAdapter {
+public class AlbumSearchAdapter extends BaseAdapter {
 
     private Context context;
     private List<AlbumItemBean> list;
     private ImageLoader imageLoader;
 //    private ImageOptions options;
 
-    public AlbumAdapter(Context context, List<AlbumItemBean> list) {
+    public AlbumSearchAdapter(Context context, List<AlbumItemBean> list) {
         this.context = context;
         this.list = list;
         imageLoader = ImageLoader.getInstance();
@@ -73,7 +66,7 @@ public class AlbumAdapter extends BaseAdapter {
     public View getView(int i, View view, ViewGroup viewGroup) {
         ViewHolder viewHolder;
         if (view == null) {
-            view = LayoutInflater.from(context).inflate(R.layout.item_album, null);
+            view = LayoutInflater.from(context).inflate(R.layout.item_search_album, null);
             viewHolder = new ViewHolder();
             viewHolder.albumImage = (ImageView) view.findViewById(R.id.album_image);
             viewHolder.albumTitle = (TextView) view.findViewById(R.id.album_title);

@@ -13,7 +13,10 @@ import com.efrobot.talkstory.R;
 import com.efrobot.talkstory.adapter.LanguageAdapter;
 import com.efrobot.talkstory.bean.AudiaItemBean;
 import com.efrobot.talkstory.bean.VersionBean;
+import com.efrobot.talkstory.utils.OptionsUtils;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.imageaware.ImageAware;
+import com.nostra13.universalimageloader.core.imageaware.ImageViewAware;
 import com.zhy.view.flowlayout.FlowLayout;
 import com.zhy.view.flowlayout.TagAdapter;
 import com.zhy.view.flowlayout.TagFlowLayout;
@@ -60,7 +63,7 @@ public class DetailListAdapter extends BaseAdapter {
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
-        final ViewHolder viewHolder;
+        ViewHolder viewHolder = null;
         if (view == null) {
             viewHolder = new ViewHolder();
             view = mInflater.inflate(R.layout.item_detail_list, null);
@@ -76,14 +79,19 @@ public class DetailListAdapter extends BaseAdapter {
         }
 
         AudiaItemBean audiaItemBean = lists.get(i);
+        viewHolder.imageView.setTag(audiaItemBean.getSmallImg());
         if (audiaItemBean != null) {
-            if (!TextUtils.isEmpty(audiaItemBean.getSmallImg()))
-                imageLoader.displayImage(audiaItemBean.getSmallImg(), viewHolder.imageView);
+            if (!TextUtils.isEmpty(audiaItemBean.getSmallImg())) {
+                ImageAware imageAware = new ImageViewAware(viewHolder.imageView, false);
+                imageLoader.displayImage(audiaItemBean.getSmallImg(), imageAware, OptionsUtils.getInstance().getCircelOption());
+            }
 
             viewHolder.title.setText(audiaItemBean.getName());
 
-            if (!TextUtils.isEmpty(audiaItemBean.getTeacherImg()))
-                imageLoader.displayImage(audiaItemBean.getTeacherImg(), viewHolder.teacherImage);
+            if (!TextUtils.isEmpty(audiaItemBean.getTeacherImg())) {
+                ImageAware imageAware = new ImageViewAware(viewHolder.teacherImage, false);
+                imageLoader.displayImage(audiaItemBean.getTeacherImg(), imageAware, OptionsUtils.getInstance().getCircelOption());
+            }
 
             viewHolder.teachName.setText(audiaItemBean.getTeacherName());
 
@@ -103,7 +111,7 @@ public class DetailListAdapter extends BaseAdapter {
 
                 @Override
                 public View getView(FlowLayout parent, int position, VersionBean versionBean) {
-                    TextView tv = (TextView) mInflater.inflate(R.layout.item_version, viewHolder.gridView, false);
+                    TextView tv = (TextView) mInflater.inflate(R.layout.item_version, null);
                     tv.setText(getLanguageStrFromType(versionBean.getType()));
                     return tv;
                 }

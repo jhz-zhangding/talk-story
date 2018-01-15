@@ -3,6 +3,7 @@ package com.efrobot.talkstory.albumdetail;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -14,11 +15,16 @@ import com.efrobot.talkstory.bean.AlbumDetail;
 import com.efrobot.talkstory.bean.AlbumItemBean;
 import com.efrobot.talkstory.bean.AudiaItemBean;
 import com.efrobot.talkstory.bean.AudioDetailBean;
+import com.efrobot.talkstory.env.Constants;
 import com.efrobot.talkstory.http.HttpParamUtils;
 import com.efrobot.talkstory.http.HttpUtils;
+import com.efrobot.talkstory.play.PlayMediaActivity;
+import com.efrobot.talkstory.utils.OptionsUtils;
 import com.google.gson.Gson;
 import com.jingchen.pulltorefresh.PullToRefreshLayout;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.imageaware.ImageAware;
+import com.nostra13.universalimageloader.core.imageaware.ImageViewAware;
 
 import org.xutils.common.Callback;
 
@@ -46,7 +52,11 @@ public class AlbumDetailActivity extends WithPlayerBaseActivity implements View.
     private DetailListAdapter detailListAdapter;
     private List<AudiaItemBean> list = new ArrayList<>();
 
+    private int page = 1;
+    private int size = 10;
+
     private int id = -1;
+    private HttpUtils httpUtils;
 
     @Override
     protected int getZdContentView() {
@@ -81,14 +91,27 @@ public class AlbumDetailActivity extends WithPlayerBaseActivity implements View.
     @Override
     protected void initListener() {
         ptrl.setOnPullListener(this);
+        audioListView.setOnItemClickListener(onItemClickListener);
     }
+
+    private AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            if (i != 0) {
+                AudiaItemBean audiaItemBean = list.get(i - 1);
+                PlayMediaActivity.openActivity(getContext(), PlayMediaActivity.class, audiaItemBean, Constants.MAIN_REQUEST_REQUEST);
+            }
+        }
+    };
 
 
     private void setAlbumInfoData(AlbumDetail albumDetail) {
         AlbumItemBean album = albumDetail.getData();
         if (album != null) {
-            if (!TextUtils.isEmpty(album.getImage()))
-                ImageLoader.getInstance().displayImage(album.getImage(), detailImage);
+            if (!TextUtils.isEmpty(album.getImage())) {
+                ImageAware imageAware = new ImageViewAware(detailImage, false);
+                ImageLoader.getInstance().displayImage(album.getImage(), imageAware, OptionsUtils.getInstance().getCircelOption());
+            }
             title.setText(album.getName());
 
             if (!TextUtils.isEmpty(album.getTeacherImg()))
@@ -100,12 +123,16 @@ public class AlbumDetailActivity extends WithPlayerBaseActivity implements View.
     }
 
     private void setAdapterData() {
-        detailListAdapter = new DetailListAdapter(this, list);
-        audioListView.setAdapter(detailListAdapter);
+        if (detailListAdapter == null) {
+            detailListAdapter = new DetailListAdapter(this, list);
+            audioListView.setAdapter(detailListAdapter);
+        } else {
+            detailListAdapter.notifyDataSetChanged();
+        }
     }
 
     private void getHttpData() {
-        HttpUtils httpUtils = new HttpUtils(false);
+        httpUtils = new HttpUtils(false);
         //专辑信息
         Map<String, Object> mapInfo = HttpParamUtils.getAlbumByIdParamMap();
         String finalUrl = String.format(HttpParamUtils.ALBUM_INFO_BY_ID_URL, id);
@@ -135,16 +162,22 @@ public class AlbumDetailActivity extends WithPlayerBaseActivity implements View.
             }
         });
 
+        getListHttp();
 
+    }
+
+    private void getListHttp() {
         //专辑列表
-        Map<String, Object> map = HttpParamUtils.getAudioUnderAlbumParamMap(0, 10, id);
+        httpUtils = new HttpUtils(false);
+        Map<String, Object> map = HttpParamUtils.getAudioUnderAlbumParamMap(page, size, id);
         httpUtils.Post(HttpParamUtils.AUDIO_UNDER_ALBUM_LIST_URL, map, new Callback.CommonCallback<String>() {
             @Override
             public void onSuccess(String result) {
+                page++;
                 L.e(TAG, "onSuccess:" + result);
                 AudioDetailBean albumBean = new Gson().fromJson(result, AudioDetailBean.class);
                 if (albumBean != null && albumBean.getData() != null) {
-                    list = albumBean.getData();
+                    list.addAll(albumBean.getData());
                     setAdapterData();
                 }
             }
@@ -189,11 +222,17 @@ public class AlbumDetailActivity extends WithPlayerBaseActivity implements View.
 
     @Override
     public void onRefresh(PullToRefreshLayout pullToRefreshLayout) {
+        //下拉刷新
+        page = 1;
+        list.clear();
+        getHttpData();
         pullToRefreshLayout.refreshFinish(PullToRefreshLayout.SUCCEED);
     }
 
     @Override
     public void onLoadMore(PullToRefreshLayout pullToRefreshLayout) {
+        getListHttp();
+
         pullToRefreshLayout.refreshFinish(PullToRefreshLayout.SUCCEED);
     }
 }

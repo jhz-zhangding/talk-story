@@ -40,6 +40,7 @@ import com.efrobot.talkstory.env.Constants;
 import com.efrobot.talkstory.http.HttpParamUtils;
 import com.efrobot.talkstory.http.HttpUtils;
 import com.efrobot.talkstory.play.PlayMediaActivity;
+import com.efrobot.talkstory.search.SearchPageActivity;
 import com.efrobot.talkstory.service.MediaPlayService;
 import com.efrobot.talkstory.utils.NoScrollGridView;
 import com.efrobot.talkstory.utils.TimeUtils;
@@ -111,6 +112,14 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
 
         setListener();
         setHttpData();
+
+        //设置历史记录
+        List<HistoryBean> historyBeanList = HistoryManager.getInstance(this).queryAllContent();
+        if (historyBeanList != null && historyBeanList.size() > 0) {
+            HistoryBean historyBean = historyBeanList.get(historyBeanList.size() - 1);
+            application.setCurrentPlayBean(historyBean);
+            updatePlayerView();
+        }
     }
 
     @Override
@@ -148,14 +157,20 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
             }
         });
 
+        getAudioList();
+
+    }
+
+    private void getAudioList() {
         Map<String, Object> audioMap = HttpParamUtils.getAudioParamMap(page, size, keyword, tagId);
         httpUtils.Post(HttpParamUtils.AUDIO_LIST_URL, audioMap, new Callback.CommonCallback<String>() {
             @Override
             public void onSuccess(String result) {
+                page++;
                 AudiaBean audiaBean = new Gson().fromJson(result, AudiaBean.class);
                 if (audiaBean != null && audiaBean.getData() != null) {
-                    recentStoryBeanList = audiaBean.getData();
-                    if (recentStoryBeanList != null && recentStoryBeanList.size() > 0) {
+                    if (audiaBean.getData().size() > 0) {
+                        recentStoryBeanList.addAll(audiaBean.getData());
                         setAudioAdapterData();
                     } else {
                         Toast.makeText(MainActivity.this, "已经没有数据了", Toast.LENGTH_SHORT).show();
@@ -178,7 +193,6 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
 
             }
         });
-
     }
 
     private void setListener() {
@@ -211,11 +225,16 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
 
     @Override
     public void onRefresh(PullToRefreshLayout pullToRefreshLayout) {
+        page = 1;
+        recentStoryBeanList.clear();
+        setHttpData();
+
         pullToRefreshLayout.refreshFinish(PullToRefreshLayout.SUCCEED);
     }
 
     @Override
     public void onLoadMore(PullToRefreshLayout pullToRefreshLayout) {
+        getAudioList();
         pullToRefreshLayout.refreshFinish(PullToRefreshLayout.SUCCEED);
     }
 
@@ -244,7 +263,8 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
         int id = view.getId();
         switch (id) {
             case R.id.main_search_edit_btn:
-
+                String keyword = searchEt.getText().toString();
+                SearchPageActivity.openSearchActivity(getContext(), SearchPageActivity.class, keyword);
                 break;
             case R.id.query_all_album_btn:
                 Intent intent = new Intent(this, AllAlbumActivity.class);
@@ -260,15 +280,8 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
 
     @Override
     protected void onDestroy() {
+        application.stopMediaService();
         super.onDestroy();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Constants.UPDATE_PROGRESS_RESULT) {
-            updatePlayerView();
-        }
     }
 
 }

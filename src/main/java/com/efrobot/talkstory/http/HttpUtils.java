@@ -30,10 +30,10 @@ public class HttpUtils {
     public Map<String, Object> tokenMap;
 
     public HttpUtils(boolean isNeedRefreshToken) {
-        if (tokenMap == null) {
+        if (isNeedRefreshToken) {
             tokenMap = getBaseAccessToken();
         } else {
-            if (isNeedRefreshToken) {
+            if (tokenMap == null) {
                 tokenMap = getBaseAccessToken();
             }
         }
@@ -81,6 +81,24 @@ public class HttpUtils {
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 params.addParameter(entry.getKey(), entry.getValue());
             }
+        }
+        Cancelable cancelable = x.http().post(params, callback);
+        L.e("HttpUtils", "params = " + params.toString());
+        return cancelable;
+    }
+
+    /**
+     * 发送post请求
+     *
+     * @param url
+     * @param callback
+     * @param <T>
+     * @return
+     */
+    public <T> Cancelable Post(String url, CommonCallback<T> callback) {
+        RequestParams params = new RequestParams(url);
+        for (Map.Entry<String, Object> entry : tokenMap.entrySet()) {
+            params.addParameter(entry.getKey(), entry.getValue());
         }
         Cancelable cancelable = x.http().post(params, callback);
         L.e("HttpUtils", "params = " + params.toString());
