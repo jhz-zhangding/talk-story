@@ -1,9 +1,10 @@
 <resources>
-    <string name="app_name">robot-talk-story</string>
+    <string name="app_name">新东方绘本馆</string>
     <string name="search">搜索</string>
     <string name="search_hint">想听什么故事呢？</string>
 
     <string name="competitive_products">精品专辑</string>
+    <string name="products">专辑</string>
     <string name="recent_story">最新故事</string>
 
 

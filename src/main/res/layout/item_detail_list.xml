@@ -2,37 +2,36 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
 
     >
 
-    <RelativeLayout
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
-        android:layout_marginBottom="15dp"
-        android:layout_marginTop="15dp">
+        android:layout_marginTop="15dp"
+        android:orientation="horizontal">
 
-        <co.songlcy.circleimage.view.CircleImage xmlns:app="http://schemas.android.com/apk/res-auto"
+        <ImageView
             android:id="@+id/item_image"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:src="@mipmap/ic_launcher"
-            app:imgBorderColor="@android:color/holo_orange_dark"
-            app:imgBorderWidth="1dp" />
+            android:src="@mipmap/ic_launcher" />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="100dp"
             android:layout_marginLeft="10dp"
-            android:layout_toRightOf="@+id/item_image"
-            android:orientation="vertical"
+            android:layout_weight="1"
             android:gravity="center_vertical"
-            >
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/item_title"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="2"
                 android:text=""
@@ -43,14 +42,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                >
 
-                <co.songlcy.circleimage.view.CircleImage xmlns:app="http://schemas.android.com/apk/res-auto"
+                <ImageView
                     android:id="@+id/item_teach_image"
                     android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    app:imgBorderColor="@android:color/holo_orange_dark"
-                    app:imgBorderWidth="1dp" />
+                    android:layout_height="40dp" />
 
                 <TextView
                     android:id="@+id/item_teach_name"
@@ -77,10 +76,10 @@
             android:id="@+id/item_grid_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="450dp"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
+            android:layout_gravity="center_vertical"
             />
-    </RelativeLayout>
+    </LinearLayout>
 
 </RelativeLayout>

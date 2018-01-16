@@ -56,12 +56,11 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <co.songlcy.circleimage.view.CircleImage xmlns:app="http://schemas.android.com/apk/res-auto"
+                <ImageView
                     android:id="@+id/item_teach_image"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    app:imgBorderColor="@android:color/holo_orange_dark"
-                    app:imgBorderWidth="1dp" />
+                    />
 
                 <TextView
                     android:id="@+id/audio_detail_author_name"

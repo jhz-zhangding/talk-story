@@ -95,7 +95,7 @@ public class AllAlbumActivity extends WithPlayerBaseActivity implements PullToRe
 
             @Override
             public void onError(Throwable ex, boolean isOnCallback) {
-
+                showToast("请求失败，请检查网络");
             }
 
             @Override

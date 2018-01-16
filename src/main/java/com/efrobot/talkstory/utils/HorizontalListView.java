@@ -254,7 +254,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
     private void positionItems(final int dx) {
         if (getChildCount() > 0) {
             mDisplayOffset += dx;
-            int left = mDisplayOffset+25;
+            int left = mDisplayOffset + 25;
             for (int i = 0; i < getChildCount(); i++) {
                 View child = getChildAt(i);
                 int childWidth = child.getMeasuredWidth();
@@ -372,5 +372,11 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
     public int getDividerHeight() {
         // TODO Auto-generated method stub
         return 0;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        getParent().requestDisallowInterceptTouchEvent(true);
+        return super.onInterceptTouchEvent(ev);
     }
 }

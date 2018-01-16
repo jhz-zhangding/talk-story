@@ -16,9 +16,15 @@ import com.danikula.videocache.CacheListener;
 import com.danikula.videocache.HttpProxyCacheServer;
 import com.efrobot.library.mvp.utils.L;
 import com.efrobot.talkstory.TalkStoryApplication;
+import com.efrobot.talkstory.bean.VersionBean;
+import com.efrobot.talkstory.env.Constants;
+import com.efrobot.talkstory.env.PlayListCache;
+import com.efrobot.talkstory.utils.PreferencesUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Created by zd on 2017/12/19.
@@ -30,55 +36,140 @@ public class MediaPlayService extends Service implements CacheListener {
     public MediaPlayer mediaPlayer;
 
     private String VIDEO_URL = "";
+    private int VIDEO_ID = 0;
 
     private String TAG = MediaPlayService.class.getSimpleName();
 
     private int currentPosition = 0;
+    private HttpProxyCacheServer proxy;
+
+    private int currentPlayMode = 1;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        proxy = TalkStoryApplication.getProxy(this);
+
+
+        currentPlayMode = PreferencesUtils.getInt(this, "playMode", Constants.ORDER_PLAY_MODE);
+
         application = TalkStoryApplication.from(this);
         application.setMediaPlayService(this);
         VIDEO_URL = intent.getStringExtra("media_url");
+        VIDEO_ID = intent.getIntExtra("media_id", -1);
         Log.e("MediaPlayService", "onStartCommand:" + "media_url = " + VIDEO_URL);
         getMediaPlayer();
         if (!TextUtils.isEmpty(VIDEO_URL)) {
             checkCachedState();
             startVideo();
         }
+
         return super.onStartCommand(intent, flags, startId);
     }
 
     public MediaPlayer getMediaPlayer() {
         if (mediaPlayer == null) {
             mediaPlayer = new MediaPlayer();
+            mediaPlayer.setOnPreparedListener(onPreparedListener);
+            mediaPlayer.setOnCompletionListener(onCompletionListener);
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         }
         return mediaPlayer;
     }
 
     private void startVideo() {
-        HttpProxyCacheServer proxy = TalkStoryApplication.getProxy(this);
         proxy.registerCacheListener(this, VIDEO_URL);
         String proxyUrl = proxy.getProxyUrl(VIDEO_URL);
         Log.d(TAG, "Use proxy url " + proxyUrl + " instead of original url " + VIDEO_URL);
         try {
+            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                mediaPlayer.reset();
+            }
             mediaPlayer.setDataSource(proxyUrl);
             mediaPlayer.prepareAsync();
-
-            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(final MediaPlayer mp) {
-                    try {
-                        mp.start();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    MediaPlayer.OnPreparedListener onPreparedListener = new MediaPlayer.OnPreparedListener() {
+        @Override
+        public void onPrepared(MediaPlayer mediaPlayer) {
+            try {
+                mediaPlayer.start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    MediaPlayer.OnCompletionListener onCompletionListener = new MediaPlayer.OnCompletionListener() {
+        @Override
+        public void onCompletion(MediaPlayer mediaPlayer) {
+            startPlayNext();
+        }
+    };
+
+    private List<VersionBean> versionBeen;
+
+    private void startPlayNext() {
+        boolean isContains = false;
+        if (PlayListCache.list != null) {
+            int nextAudioIndex = 0;
+            for (int i = 0; i < PlayListCache.list.size(); i++) {
+                int id = PlayListCache.list.get(i).getId();
+                if (id == VIDEO_ID) {
+                    versionBeen = PlayListCache.list.get(i).getVersions();
+                    nextAudioIndex = i;
+                    isContains = true;
+                    break;
+                }
+            }
+
+            if (!isContains) {
+                if (PlayListCache.list.size() > 0) {
+                    versionBeen = PlayListCache.list.get(0).getVersions();
+                }
+            }
+
+            if (versionBeen != null && versionBeen.size() > 0) {
+                int nextVersionIndex = 0;
+                for (int i = 0; i < versionBeen.size(); i++) {
+                    String url = versionBeen.get(i).getAudioUrl();
+                    if (url.equals(VIDEO_URL)) {
+                        nextVersionIndex = i + 1;
+                        break;
+                    }
+                }
+                if (nextVersionIndex < versionBeen.size()) {
+                    //对于多版本故事，默认先播放第一版本，再播放第二版本
+                    VIDEO_URL = versionBeen.get(nextVersionIndex).getAudioUrl();
+                } else {
+                    //版本都播完，开始播放下一个故事
+                    switch (currentPlayMode) {
+                        case Constants.ORDER_PLAY_MODE:
+                            nextAudioIndex = nextVersionIndex + 1;
+                            if (nextAudioIndex >= PlayListCache.list.size()) {
+                                nextAudioIndex = 0;
+                            }
+                            break;
+                        case Constants.RANDOM_PLAY_MODE:
+                            nextAudioIndex = new Random().nextInt(PlayListCache.list.size());
+                            break;
+                        case Constants.CIRCEL_PLAY_MODE:
+
+                            break;
+                    }
+
+                    L.e("", "PlayListCache.list.size() = " + PlayListCache.list.size() + "----nextAudioIndex = " + nextAudioIndex);
+                    if (nextAudioIndex < PlayListCache.list.size()) {
+                        versionBeen = PlayListCache.list.get(nextAudioIndex).getVersions();
+                        if (versionBeen != null && versionBeen.size() > 0) {
+                            VIDEO_URL = PlayListCache.list.get(nextAudioIndex).getVersions().get(0).getAudioUrl();
+                        }
+                    }
+                }
+                startVideo();
+            }
         }
     }
 
@@ -107,38 +198,20 @@ public class MediaPlayService extends Service implements CacheListener {
         }
     }
 
-    public void playNext(String path) {
-        if (!TextUtils.isEmpty(path)) {
-
-        }
-    }
-
-    public void playLast(String path) {
-        if (!TextUtils.isEmpty(path)) {
-
-        }
-    }
-
     @Override
     public void onCacheAvailable(File cacheFile, String url, int percentsAvailable) {
 //        progressBar.setSecondaryProgress(percentsAvailable);
-        setCachedState(percentsAvailable == 100);
         Log.d(TAG, String.format("onCacheAvailable. percents: %d, file: %s, url: %s", percentsAvailable, cacheFile, url));
     }
 
     private void checkCachedState() {
         HttpProxyCacheServer proxy = TalkStoryApplication.getProxy(this);
         boolean fullyCached = proxy.isCached(VIDEO_URL);
-        setCachedState(fullyCached);
         if (fullyCached) {
 //            progressBar.setSecondaryProgress(100);
         }
     }
 
-    private void setCachedState(boolean cached) {
-//        int statusIconId = cached ? R.drawable.ic_cloud_done : R.drawable.ic_cloud_download;
-//        cacheStatusImageView.setImageResource(statusIconId);
-    }
 
     private final class VideoProgressUpdater extends Handler {
 

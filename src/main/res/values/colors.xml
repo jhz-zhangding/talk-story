@@ -24,6 +24,9 @@
     <color name="base_text99">#99CCCCCC</color>
     <color name="base_text55">#55CCCCCC</color>
 
+    <color name="selected_color">#ddd</color>
+    <color name="unselected_color">#fff</color>
+
 
 
 </resources>

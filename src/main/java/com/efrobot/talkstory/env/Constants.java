@@ -12,4 +12,13 @@ public class Constants {
 
     public static final String UPDATE_PLAYER_RECEIVER_ACTION = "com.efrobot.talkstory.action_update_player_receiver";
 
+    //顺序播放
+    public static final int ORDER_PLAY_MODE = 1;
+
+    //随机播放
+    public static final int RANDOM_PLAY_MODE = 2;
+
+    //循环播放
+    public static final int CIRCEL_PLAY_MODE = 3;
+
 }

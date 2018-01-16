@@ -71,7 +71,10 @@ public class PopupWindowAdapter extends BaseAdapter {
             String content = historyBean.getTeacherName() + " - " + historyBean.getName();
             viewHolder.textView.setText(content);
 
-            viewHolder.imageView.setVisibility((id == historyBean.getId()) ? View.VISIBLE : View.INVISIBLE);
+            if (id == historyBean.getId()) {
+                viewHolder.imageView.setVisibility(View.VISIBLE);
+            } else
+                viewHolder.imageView.setVisibility(View.INVISIBLE);
         }
 
         return view;

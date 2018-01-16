@@ -23,14 +23,14 @@
             android:id="@+id/base_play_pause_and_play"
             android:layout_width="35dp"
             android:layout_height="35dp"
-            android:layout_marginLeft="20dp"
+            android:layout_marginLeft="40dp"
             android:background="@mipmap/player_start" />
 
         <ImageView
             android:id="@+id/play_next_btn"
             android:layout_width="35dp"
             android:layout_height="35dp"
-            android:layout_marginLeft="20dp"
+            android:layout_marginLeft="40dp"
             android:background="@mipmap/player_next" />
 
         <LinearLayout
@@ -91,7 +91,7 @@
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_marginLeft="50dp"
-            android:background="@mipmap/player_random" />
+            android:background="@mipmap/player_order" />
 
         <ImageView
             android:id="@+id/play_history"

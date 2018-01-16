@@ -50,32 +50,22 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:gravity="center"
-        android:minHeight="50dp"
-        android:maxWidth="250dp"
+        android:maxWidth="350dp"
+        android:minHeight="40dp"
         android:maxLines="2"
         android:textColor="@color/base_text_color"
         android:textSize="18sp"
         android:text="还是空间的划分空间开房间"
         />
 
-    <RelativeLayout
+    <com.zhy.view.flowlayout.TagFlowLayout
+        android:id="@+id/language_flow_layout"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-
-        <TextView
-            android:id="@+id/recent_story_double_language"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            />
-
-        <TextView
-            android:id="@+id/recent_story_single_language"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            />
-
-    </RelativeLayout>
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:minWidth="450dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="15dp"
+        />
 
 </LinearLayout>

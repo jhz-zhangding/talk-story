@@ -1,6 +1,7 @@
 package com.efrobot.talkstory.search;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,10 +23,17 @@ public class TagContentAdapter extends BaseAdapter {
 
     private LayoutInflater inflater;
 
+    private String str = "";
+
     public TagContentAdapter(Context context, List<SearchItemBean> list) {
         this.context = context;
         this.list = list;
         inflater = LayoutInflater.from(context);
+    }
+
+    public void updateSelectedView(String str) {
+        this.str = str;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -57,6 +65,11 @@ public class TagContentAdapter extends BaseAdapter {
 
         String text = list.get(i).getName();
         viewHolder.textView.setText(text);
+//        if (text.equals(str)) {
+//            viewHolder.textView.setBackgroundResource(R.color.selected_color);
+//        } else {
+//            viewHolder.textView.setBackgroundResource(R.color.selected_color);
+//        }
 
         return view;
     }

@@ -30,11 +30,16 @@
             android:exported="true" />
 
         <activity android:name=".albumdetail.AlbumDetailActivity" />
-        <activity android:name=".play.PlayMediaActivity" />
+        <activity android:name=".play.PlayMediaActivity"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            />
         <activity
             android:name=".allalbum.AllAlbumActivity"
-            android:windowSoftInputMode="stateAlwaysHidden"/>
+            android:windowSoftInputMode="stateAlwaysHidden" />
         <activity android:name=".TestActivity" />
+        <activity
+            android:name=".search.SearchPageActivity"
+            android:windowSoftInputMode="stateAlwaysHidden" />
     </application>
 
 </manifest>

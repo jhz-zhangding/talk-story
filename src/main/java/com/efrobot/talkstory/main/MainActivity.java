@@ -2,30 +2,21 @@ package com.efrobot.talkstory.main;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.os.PersistableBundle;
-import android.text.TextUtils;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.PopupWindow;
-import android.widget.ProgressBar;
+import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.efrobot.library.mvp.utils.L;
+import com.efrobot.library.mvp.utils.PreferencesUtils;
 import com.efrobot.talkstory.R;
 import com.efrobot.talkstory.TalkStoryApplication;
 import com.efrobot.talkstory.adapter.AlbumAdapter;
-import com.efrobot.talkstory.adapter.PopupWindowAdapter;
 import com.efrobot.talkstory.adapter.RecentStoryAdapter;
 import com.efrobot.talkstory.albumdetail.AlbumDetailActivity;
 import com.efrobot.talkstory.allalbum.AllAlbumActivity;
@@ -37,16 +28,14 @@ import com.efrobot.talkstory.bean.AudiaItemBean;
 import com.efrobot.talkstory.bean.HistoryBean;
 import com.efrobot.talkstory.db.HistoryManager;
 import com.efrobot.talkstory.env.Constants;
+import com.efrobot.talkstory.env.PlayListCache;
 import com.efrobot.talkstory.http.HttpParamUtils;
 import com.efrobot.talkstory.http.HttpUtils;
 import com.efrobot.talkstory.play.PlayMediaActivity;
 import com.efrobot.talkstory.search.SearchPageActivity;
-import com.efrobot.talkstory.service.MediaPlayService;
-import com.efrobot.talkstory.utils.NoScrollGridView;
-import com.efrobot.talkstory.utils.TimeUtils;
+import com.efrobot.talkstory.utils.HorizontalListView;
 import com.google.gson.Gson;
 import com.jingchen.pulltorefresh.PullToRefreshLayout;
-import com.nostra13.universalimageloader.core.ImageLoader;
 
 import org.xutils.common.Callback;
 
@@ -66,8 +55,8 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
 
     private PullToRefreshLayout ptrl;
 
-    private NoScrollGridView albumGridView;
-    private NoScrollGridView recentStoryGridView;
+    private HorizontalListView albumGridView;
+    private GridView recentStoryGridView;
 
     private AlbumAdapter albumAdapter;
     private RecentStoryAdapter recentStoryAdapter;
@@ -83,6 +72,8 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
 
     private TalkStoryApplication application;
 
+    private int lastid = 0;
+
     @Override
     protected int getZdContentView() {
         return R.layout.activity_main;
@@ -95,8 +86,11 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);//去掉信息栏
     }
 
+    View headView;
+
     @Override
     protected void initView() {
+        lastid = PreferencesUtils.getInt(getContext(), "lastId");
         httpUtils = new HttpUtils(false);
 
         application = TalkStoryApplication.from(this);
@@ -104,8 +98,8 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
         searchEt = (EditText) findViewById(R.id.main_search_edit);
         startSearchBtn = (TextView) findViewById(R.id.main_search_edit_btn);
         ptrl = (PullToRefreshLayout) findViewById(R.id.refresh_view);
-        albumGridView = (NoScrollGridView) findViewById(R.id.competitive_products_grid_view);
-        recentStoryGridView = (NoScrollGridView) findViewById(R.id.recent_story_grid_view);
+        recentStoryGridView = (GridView) findViewById(R.id.recent_story_grid_view);
+        albumGridView = (HorizontalListView) findViewById(R.id.competitive_products_grid_view);
 
         albumBeanList = new ArrayList<>();
         recentStoryBeanList = new ArrayList<>();
@@ -116,8 +110,12 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
         //设置历史记录
         List<HistoryBean> historyBeanList = HistoryManager.getInstance(this).queryAllContent();
         if (historyBeanList != null && historyBeanList.size() > 0) {
-            HistoryBean historyBean = historyBeanList.get(historyBeanList.size() - 1);
-            application.setCurrentPlayBean(historyBean);
+            for (int i = 0; i < historyBeanList.size(); i++) {
+                if (historyBeanList.get(i).getId() == lastid) {
+                    application.setCurrentPlayBean(historyBeanList.get(i));
+                    break;
+                }
+            }
             updatePlayerView();
         }
     }
@@ -128,7 +126,7 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
     }
 
     private void setHttpData() {
-        Map<String, Object> albumMap = HttpParamUtils.getAlbumParamMap(0, 5, "", 0);
+        Map<String, Object> albumMap = HttpParamUtils.getAlbumParamMap(0, 10, "", 0);
         httpUtils.Post(HttpParamUtils.ALBUM_LIST_URL, albumMap, new Callback.CommonCallback<String>() {
             @Override
             public void onSuccess(String result) {
@@ -144,6 +142,7 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
             @Override
             public void onError(Throwable ex, boolean isOnCallback) {
                 L.e(TAG, "onError");
+                showToast("请求失败，请检查网络");
             }
 
             @Override
@@ -180,7 +179,7 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
 
             @Override
             public void onError(Throwable ex, boolean isOnCallback) {
-
+                showToast("请求失败，请检查网络");
             }
 
             @Override
@@ -218,6 +217,8 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
         if (recentStoryAdapter == null) {
             recentStoryAdapter = new RecentStoryAdapter(MainActivity.this, recentStoryBeanList);
             recentStoryGridView.setAdapter(recentStoryAdapter);
+            //存储当前列表 用于切换上下条
+            PlayListCache.getInstance(getContext()).setList(recentStoryBeanList);
         } else {
             recentStoryAdapter.notifyDataSetChanged();
         }
@@ -244,7 +245,7 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
             if (albumBeanList != null && albumBeanList.size() > 0) {
                 Intent intent = new Intent(MainActivity.this, AlbumDetailActivity.class);
                 intent.putExtra("id", albumBeanList.get(i).getId());
-                startActivity(intent);
+                startActivityForResult(intent, Constants.MAIN_REQUEST_REQUEST);
             }
         }
     }
@@ -252,7 +253,9 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
     private class RecentStoryItemClickListener implements AdapterView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            PlayListCache.getInstance(getContext()).setList(recentStoryBeanList);
             PlayMediaActivity.openActivity(MainActivity.this, PlayMediaActivity.class, recentStoryBeanList.get(i), Constants.MAIN_REQUEST_REQUEST);
+            //将当前的故事列表存储
 //            Intent intent = new Intent(MainActivity.this, PlayMediaActivity.class);
 //            startActivity(intent);
         }
@@ -284,4 +287,13 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
         super.onDestroy();
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Constants.UPDATE_PROGRESS_RESULT) {
+            if (recentStoryAdapter != null) {
+                recentStoryAdapter.notifyDataSetChanged();
+            }
+        }
+    }
 }

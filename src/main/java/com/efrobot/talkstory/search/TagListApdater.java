@@ -77,10 +77,20 @@ public class TagListApdater extends BaseAdapter {
                 if (onTagClickItemListener != null) {
                     onTagClickItemListener.onClick(searchDataBean.getList().get(i).getId());
                 }
+
+//                if (contentAdapter != null) {
+//                    contentAdapter.updateSelectedView(searchDataBean.getList().get(i).getName());
+//                }
             }
         });
 
         return view;
+    }
+
+    public void updateSelectedView() {
+        if (contentAdapter != null) {
+            contentAdapter.updateSelectedView("");
+        }
     }
 
     class ViewHolder {

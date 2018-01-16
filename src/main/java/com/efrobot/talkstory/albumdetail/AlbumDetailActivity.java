@@ -16,6 +16,7 @@ import com.efrobot.talkstory.bean.AlbumItemBean;
 import com.efrobot.talkstory.bean.AudiaItemBean;
 import com.efrobot.talkstory.bean.AudioDetailBean;
 import com.efrobot.talkstory.env.Constants;
+import com.efrobot.talkstory.env.PlayListCache;
 import com.efrobot.talkstory.http.HttpParamUtils;
 import com.efrobot.talkstory.http.HttpUtils;
 import com.efrobot.talkstory.play.PlayMediaActivity;
@@ -86,6 +87,11 @@ public class AlbumDetailActivity extends WithPlayerBaseActivity implements View.
         } else {
 
         }
+
+        /***
+         * 更新底部播放器数据
+         */
+        updatePlayerView();
     }
 
     @Override
@@ -129,6 +135,7 @@ public class AlbumDetailActivity extends WithPlayerBaseActivity implements View.
         } else {
             detailListAdapter.notifyDataSetChanged();
         }
+        PlayListCache.getInstance(getContext()).setList(list);
     }
 
     private void getHttpData() {
@@ -148,7 +155,7 @@ public class AlbumDetailActivity extends WithPlayerBaseActivity implements View.
 
             @Override
             public void onError(Throwable ex, boolean isOnCallback) {
-
+                showToast("请求失败，请检查网络");
             }
 
             @Override
@@ -184,7 +191,7 @@ public class AlbumDetailActivity extends WithPlayerBaseActivity implements View.
 
             @Override
             public void onError(Throwable ex, boolean isOnCallback) {
-
+                showToast("请求失败，请检查网络");
             }
 
             @Override

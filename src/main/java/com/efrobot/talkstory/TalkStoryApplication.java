@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 
 import com.danikula.videocache.HttpProxyCacheServer;
+import com.efrobot.library.mvp.utils.PreferencesUtils;
 import com.efrobot.talkstory.bean.HistoryBean;
 import com.efrobot.talkstory.db.DbHelper;
 import com.efrobot.talkstory.service.MediaPlayService;
@@ -105,6 +106,7 @@ public class TalkStoryApplication extends Application {
     }
 
     public void setCurrentPlayBean(HistoryBean currentPlayBean) {
+        PreferencesUtils.putInt(this, "lastId", currentPlayBean.getId());
         this.currentPlayBean = currentPlayBean;
     }
 

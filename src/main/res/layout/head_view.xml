@@ -30,15 +30,13 @@
             android:textSize="24sp" />
     </RelativeLayout>
 
-    <com.efrobot.talkstory.utils.NoScrollGridView
+    <com.efrobot.talkstory.utils.HorizontalListView
         android:id="@+id/competitive_products_grid_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="320dp"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
-        android:layout_marginTop="20dp"
         android:gravity="center"
-        android:horizontalSpacing="20dp"
-        android:numColumns="5" />
+        />
 
 </LinearLayout>

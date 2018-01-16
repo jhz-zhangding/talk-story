@@ -1,15 +1,24 @@
+import java.text.SimpleDateFormat
+
 apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
     buildToolsVersion '25.0.3'
+
     defaultConfig {
+        SimpleDateFormat formatter = new SimpleDateFormat("MMdd");
+        //获取当前时间
+        Date curDate = new Date(System.currentTimeMillis());
+        String timeVersionName = formatter.format(curDate);
         applicationId "com.efrobot.talkstory"
         minSdkVersion 19
         targetSdkVersion 25
         versionCode 1
-        versionName "1.0"
+        versionName "1.0." + timeVersionName
     }
+
+
     buildTypes {
         release {
             minifyEnabled false

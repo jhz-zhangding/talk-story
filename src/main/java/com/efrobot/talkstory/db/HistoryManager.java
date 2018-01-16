@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.efrobot.talkstory.TalkStoryApplication;
 import com.efrobot.talkstory.bean.HistoryBean;
+import com.efrobot.talkstory.env.Constants;
 
 import java.util.ArrayList;
 
@@ -112,6 +113,13 @@ public class HistoryManager {
      */
     public void deleteContentById(int id) {
         db.delete(CONTENT_TABLE, "id = ? ", new String[]{id + ""});
+    }
+
+    /**
+     * 删除项目下的某个内容
+     */
+    public void delete() {
+        db.delete(CONTENT_TABLE, null, null);
     }
 
 }

@@ -101,4 +101,9 @@ public abstract class BaseActivity extends Activity {
         }
         return onTouchEvent(ev);
     }
+
+    public void showToast(String showToast) {
+        Toast.makeText(this, showToast, Toast.LENGTH_SHORT).show();
+    }
+
 }

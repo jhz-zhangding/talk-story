@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.efrobot.talkstory.search.SearchPageActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/base_gray"
+        android:gravity="center"
+        android:minHeight="120dp">
+
+        <EditText
+            android:id="@+id/main_search_edit"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:background="@color/white"
+            android:hint="@string/search_hint"
+            android:minWidth="800dp"
+            android:paddingLeft="10dp"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/main_search_edit_btn"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:layout_toRightOf="@+id/main_search_edit"
+            android:background="@drawable/selector_search_btn"
+            android:gravity="center"
+            android:text="@string/search"
+            android:textColor="@color/white"
+            android:textSize="22sp" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.7"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tag_all_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:minHeight="50dp"
+                android:paddingLeft="30dp"
+                android:text="全部"
+                android:textColor="@color/black"
+                android:textSize="22sp" />
+
+            <ListView
+                android:id="@+id/search_tag_list_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="#CCCCCC" />
+
+        <com.jingchen.pulltorefresh.PullToRefreshLayout
+            android:id="@+id/refresh_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.2">
+
+
+            <com.jingchen.pulltorefresh.PullableListView
+                android:id="@+id/search_content_list_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+
+        </com.jingchen.pulltorefresh.PullToRefreshLayout>
+
+
+    </LinearLayout>
+
+
+</LinearLayout>

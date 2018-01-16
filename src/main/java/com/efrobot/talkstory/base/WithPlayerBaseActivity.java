@@ -29,18 +29,32 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.efrobot.library.mvp.utils.L;
+import com.efrobot.library.mvp.utils.PreferencesUtils;
 import com.efrobot.talkstory.R;
 import com.efrobot.talkstory.TalkStoryApplication;
 import com.efrobot.talkstory.adapter.PopupWindowAdapter;
+import com.efrobot.talkstory.bean.AudiaItemBean;
+import com.efrobot.talkstory.bean.AudioDetail;
+import com.efrobot.talkstory.bean.AudioDetailBean;
 import com.efrobot.talkstory.bean.HistoryBean;
+import com.efrobot.talkstory.bean.VersionBean;
 import com.efrobot.talkstory.db.HistoryManager;
 import com.efrobot.talkstory.env.Constants;
+import com.efrobot.talkstory.env.PlayListCache;
+import com.efrobot.talkstory.http.HttpParamUtils;
+import com.efrobot.talkstory.http.HttpUtils;
+import com.efrobot.talkstory.play.PlayMediaActivity;
 import com.efrobot.talkstory.utils.PopupOrderPriceDetail;
 import com.efrobot.talkstory.utils.TimeUtils;
 import com.efrobot.talkstory.utils.VerticalSeekBar;
+import com.google.gson.Gson;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
+import org.xutils.common.Callback;
+
 import java.util.List;
+import java.util.Map;
 
 public abstract class WithPlayerBaseActivity extends Activity {
 
@@ -92,6 +106,7 @@ public abstract class WithPlayerBaseActivity extends Activity {
 
         initView();
         initListener();
+        updatePlayModeImage();
     }
 
     private void initPlayView() {
@@ -113,6 +128,20 @@ public abstract class WithPlayerBaseActivity extends Activity {
         playModeImg.setOnClickListener(onClick);
         playHistoryImg.setOnClickListener(onClick);
         playVolumImg.setOnClickListener(onClick);
+        findViewById(R.id.play_framelayout).setOnClickListener(onClick);
+    }
+
+    private void startPlay(String url) {
+        if (application != null) {
+            if (application.mediaPlayService != null && application.mediaPlayService.mediaPlayer != null) {
+                if (!TextUtils.isEmpty(url)) {
+                    application.mediaPlayService.startOtherVideo(url);
+                }
+            } else {
+                application.startMediaService(this, url);
+            }
+            application.isPlayingStory = true;
+        }
     }
 
     View.OnClickListener onClick = new View.OnClickListener() {
@@ -122,6 +151,34 @@ public abstract class WithPlayerBaseActivity extends Activity {
             switch (id) {
                 case R.id.play_last_btn:
                     //上一条
+                    if (PlayListCache.list != null) {
+                        AudiaItemBean audiaItemBean = PlayListCache.getInstance(getContext()).getLastAudio(id);
+                        if (audiaItemBean != null && audiaItemBean.getVersions() != null) {
+                            if (audiaItemBean.getVersions().size() > 0) {
+                                /** 默认播放第一条 **/
+                                VersionBean versionBean = audiaItemBean.getVersions().get(0);
+                                startPlay(versionBean.getAudioUrl());
+                                application.setCurrentPlayBean(gerateHistoryData(audiaItemBean, versionBean));
+                            }
+                        }
+                    }
+
+                    updatePlayerView();
+                    break;
+                case R.id.play_next_btn:
+                    //下一条
+                    if (PlayListCache.list != null) {
+                        AudiaItemBean audiaItemBean = PlayListCache.getInstance(getContext()).getNextAudio(application.getCurrentPlayBean().getId());
+                        if (audiaItemBean != null && audiaItemBean.getVersions() != null) {
+                            if (audiaItemBean.getVersions().size() > 0) {
+                                /** 默认播放第一条 **/
+                                VersionBean versionBean = audiaItemBean.getVersions().get(0);
+                                startPlay(versionBean.getAudioUrl());
+                                application.setCurrentPlayBean(gerateHistoryData(audiaItemBean, versionBean));
+                            }
+                        }
+                    }
+                    updatePlayerView();
                     break;
                 case R.id.base_play_pause_and_play:
                     //开始暂停
@@ -133,35 +190,92 @@ public abstract class WithPlayerBaseActivity extends Activity {
                             application.mediaPlayService.continueOrStart();
                         }
                     } else {
-                        if (historyBeanList != null && historyBeanList.size() > 0) {
-                            String mMediaUrl = historyBeanList.get(historyBeanList.size() - 1).getAudioUrl();
+                        if (application.getCurrentPlayBean() != null) {
+                            String mMediaUrl = application.getCurrentPlayBean().getAudioUrl();
                             application.isPlayingStory = true;
                             application.startMediaService(getContext(), mMediaUrl);
                         }
                     }
                     updatePlayerView();
                     break;
-                case R.id.play_next_btn:
-                    //吓一跳
-
-                    break;
                 case R.id.play_mode:
                     //播放模式
-
+                    int playMode = PreferencesUtils.getInt(getContext(), "playMode", Constants.ORDER_PLAY_MODE);
+                    if (playMode == Constants.ORDER_PLAY_MODE) {
+                        PreferencesUtils.putInt(getContext(), "playMode", Constants.RANDOM_PLAY_MODE);
+                    } else if (playMode == Constants.RANDOM_PLAY_MODE) {
+                        PreferencesUtils.putInt(getContext(), "playMode", Constants.CIRCEL_PLAY_MODE);
+                    } else if (playMode == Constants.CIRCEL_PLAY_MODE) {
+                        PreferencesUtils.putInt(getContext(), "playMode", Constants.ORDER_PLAY_MODE);
+                    }
+                    updatePlayModeImage();
                     break;
                 case R.id.play_history:
                     //历史
                     showPopupWindowView();
-                    mHandle.sendEmptyMessageDelayed(HIDE_NAVIGATION_VIEW, 1000);
+//                    mHandle.sendEmptyMessageDelayed(HIDE_NAVIGATION_VIEW, 1000);
                     break;
                 case R.id.play_volume:
                     //音量
                     showVolumePopupWindow();
-                    mHandle.sendEmptyMessageDelayed(HIDE_NAVIGATION_VIEW, 1000);
+//                    mHandle.sendEmptyMessageDelayed(HIDE_NAVIGATION_VIEW, 1000);
+                    break;
+                case R.id.play_framelayout:
+                    if (application != null && application.getCurrentPlayBean() != null) {
+                        getData(application.getCurrentPlayBean().getId(), application.getCurrentPlayBean().getType());
+                    }
                     break;
             }
         }
     };
+
+    private void getData(int id, final int type) {
+        HttpUtils httpUtils = new HttpUtils(false);
+        Map<String, Object> mapInfo = HttpParamUtils.getAudioByIdParamMap();
+        String finalUrl = String.format(HttpParamUtils.AUDIO_BY_ID_URL, id);
+        httpUtils.Post(finalUrl, mapInfo, new Callback.CommonCallback<String>() {
+                    @Override
+                    public void onSuccess(String result) {
+                        L.e("WithPlayerBaseActivity", "onSuccess:" + result);
+                        AudioDetail albumBean = new Gson().fromJson(result, AudioDetail.class);
+                        if (albumBean != null && albumBean.getData() != null) {
+                            PlayMediaActivity.openActivity(getContext(), PlayMediaActivity.class, albumBean.getData(), type, Constants.MAIN_REQUEST_REQUEST);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable ex, boolean isOnCallback) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(CancelledException cex) {
+
+                    }
+
+                    @Override
+                    public void onFinished() {
+
+                    }
+                }
+
+        );
+
+    }
+
+
+    private int[] playMode = new int[]{Constants.ORDER_PLAY_MODE, Constants.RANDOM_PLAY_MODE, Constants.CIRCEL_PLAY_MODE};
+
+    public void updatePlayModeImage() {
+        int playMode = PreferencesUtils.getInt(getContext(), "playMode");
+        if (playMode == Constants.ORDER_PLAY_MODE) {
+            playModeImg.setBackgroundResource(R.mipmap.player_order);
+        } else if (playMode == Constants.RANDOM_PLAY_MODE) {
+            playModeImg.setBackgroundResource(R.mipmap.player_random);
+        } else if (playMode == Constants.CIRCEL_PLAY_MODE) {
+            playModeImg.setBackgroundResource(R.mipmap.player_circle);
+        }
+    }
 
     /**
      * 隐藏状态栏
@@ -180,10 +294,14 @@ public abstract class WithPlayerBaseActivity extends Activity {
     int measuredHeight;
 
     private void showPopupWindowView() {
+        int id = -1;
+        if (application.getCurrentPlayBean() != null) {
+            id = application.getCurrentPlayBean().getId();
+        }
         contentView = LayoutInflater.from(this).inflate(R.layout.popup_history_lauout, null);
         popupWindow = new PopupOrderPriceDetail(this, contentView);
         ListView listView = (ListView) contentView.findViewById(R.id.pop_list_view);
-        popupWindowAdapter = new PopupWindowAdapter(this, historyBeanList, 1);
+        popupWindowAdapter = new PopupWindowAdapter(this, historyBeanList, id);
         listView.setAdapter(popupWindowAdapter);
         popupWindow.showUp(playHistoryImg);
     }
@@ -204,8 +322,7 @@ public abstract class WithPlayerBaseActivity extends Activity {
 
         verticalSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() //调音监听器
         {
-            public void onProgressChanged(SeekBar arg0,int progress,boolean fromUser)
-            {
+            public void onProgressChanged(SeekBar arg0, int progress, boolean fromUser) {
                 audiomanage.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0);
                 currentVolume = audiomanage.getStreamVolume(AudioManager.STREAM_MUSIC);  //获取当前值
                 verticalSeekBar.setProgress(currentVolume);
@@ -216,6 +333,7 @@ public abstract class WithPlayerBaseActivity extends Activity {
                 // TODO Auto-generated method stub
 
             }
+
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 // TODO Auto-generated method stub
@@ -396,6 +514,21 @@ public abstract class WithPlayerBaseActivity extends Activity {
         if (resultCode == Constants.UPDATE_PROGRESS_RESULT) {
             updatePlayerView();
         }
+    }
+
+    private HistoryBean gerateHistoryData(AudiaItemBean audiaItemBean, VersionBean versionBean) {
+        HistoryBean historyBean = new HistoryBean();
+        if (audiaItemBean != null && versionBean != null) {
+            historyBean.setId(audiaItemBean.getId());
+            historyBean.setName(audiaItemBean.getName());
+            historyBean.setTeacherName(audiaItemBean.getTeacherName());
+            historyBean.setSmallImg(audiaItemBean.getSmallImg());
+            historyBean.setAudioPath(versionBean.getAudioPath());
+            historyBean.setAudioUrl(versionBean.getAudioUrl());
+            historyBean.setPlayTime(versionBean.getPlayTime());
+            historyBean.setType(versionBean.getType());
+        }
+        return historyBean;
     }
 
 }

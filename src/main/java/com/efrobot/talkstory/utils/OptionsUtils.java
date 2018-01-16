@@ -34,7 +34,7 @@ public class OptionsUtils {
     public DisplayImageOptions getCircelOption() {
         //圆形图片
         DisplayImageOptions options3 = new DisplayImageOptions.Builder()
-                .showImageForEmptyUri(R.mipmap.ic_launcher)
+                .showImageForEmptyUri(R.mipmap.default_image)
                 .cacheInMemory(true)
                 .cacheOnDisc(true)
                 .bitmapConfig(Bitmap.Config.ARGB_8888)   //设置图片的解码类型
