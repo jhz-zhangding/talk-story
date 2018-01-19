@@ -30,9 +30,9 @@
             android:exported="true" />
 
         <activity android:name=".albumdetail.AlbumDetailActivity" />
-        <activity android:name=".play.PlayMediaActivity"
-            android:windowSoftInputMode="stateAlwaysHidden"
-            />
+        <activity
+            android:name=".play.PlayMediaActivity"
+            android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
             android:name=".allalbum.AllAlbumActivity"
             android:windowSoftInputMode="stateAlwaysHidden" />

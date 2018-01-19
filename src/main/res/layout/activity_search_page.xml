@@ -10,29 +10,47 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/base_gray"
-        android:gravity="center"
         android:minHeight="120dp">
 
-        <EditText
-            android:id="@+id/main_search_edit"
+        <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:background="@color/white"
-            android:hint="@string/search_hint"
-            android:minWidth="800dp"
-            android:paddingLeft="10dp"
-            android:textSize="18sp" />
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            >
 
-        <TextView
-            android:id="@+id/main_search_edit_btn"
-            android:layout_width="100dp"
+            <EditText
+                android:id="@+id/main_search_edit"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:background="@color/white"
+                android:hint="@string/search_hint"
+                android:minWidth="800dp"
+                android:paddingLeft="10dp"
+                android:textColorHint="#999999"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/main_search_edit_btn"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_toRightOf="@+id/main_search_edit"
+                android:background="@drawable/selector_search_btn"
+                android:gravity="center"
+                android:text="@string/search"
+                android:textColor="@color/white"
+                android:textSize="22sp" />
+
+        </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/back"
+            android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_toRightOf="@+id/main_search_edit"
-            android:background="@drawable/selector_search_btn"
-            android:gravity="center"
-            android:text="@string/search"
-            android:textColor="@color/white"
-            android:textSize="22sp" />
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="30dp"
+            android:background="@mipmap/base_back" />
+
     </RelativeLayout>
 
     <LinearLayout
@@ -57,9 +75,9 @@
                 android:textColor="@color/black"
                 android:textSize="22sp" />
 
-            <ListView
+            <ExpandableListView
                 android:id="@+id/search_tag_list_view"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
 

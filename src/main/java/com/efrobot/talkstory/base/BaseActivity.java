@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -12,9 +13,13 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.efrobot.library.mvp.utils.L;
 import com.efrobot.talkstory.R;
 
 public abstract class BaseActivity extends Activity {
+
+    public int screenWidth;
+    public int screenHeight;
 
     @Override
     protected void onResume() {
@@ -25,6 +30,26 @@ public abstract class BaseActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
         super.onCreate(savedInstanceState, persistentState);
+
+        DisplayMetrics dm = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+        screenWidth = dm.widthPixels;
+        screenHeight = dm.heightPixels;
+        L.e("BaseActivity", "screenWidth = " + screenWidth + "  screenHeight = " + screenHeight);
+    }
+
+    public int getScreenWidth() {
+        DisplayMetrics dm = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+        screenWidth = dm.widthPixels;
+        return screenWidth;
+    }
+
+    public int getScreenHeight() {
+        DisplayMetrics dm = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+        screenHeight = dm.heightPixels;
+        return screenHeight;
     }
 
     public Context getContext() {

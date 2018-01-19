@@ -17,11 +17,4 @@
         android:background="#cccccc"
         />
 
-    <com.efrobot.talkstory.utils.NoScrollListView
-        android:id="@+id/tag_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="none"
-        />
-
 </LinearLayout>

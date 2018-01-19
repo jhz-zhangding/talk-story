@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioManager;
@@ -18,12 +19,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -31,12 +31,12 @@ import android.widget.Toast;
 
 import com.efrobot.library.mvp.utils.L;
 import com.efrobot.library.mvp.utils.PreferencesUtils;
+import com.efrobot.library.mvp.utils.RobotToastUtil;
 import com.efrobot.talkstory.R;
 import com.efrobot.talkstory.TalkStoryApplication;
 import com.efrobot.talkstory.adapter.PopupWindowAdapter;
 import com.efrobot.talkstory.bean.AudiaItemBean;
 import com.efrobot.talkstory.bean.AudioDetail;
-import com.efrobot.talkstory.bean.AudioDetailBean;
 import com.efrobot.talkstory.bean.HistoryBean;
 import com.efrobot.talkstory.bean.VersionBean;
 import com.efrobot.talkstory.db.HistoryManager;
@@ -107,6 +107,7 @@ public abstract class WithPlayerBaseActivity extends Activity {
         initView();
         initListener();
         updatePlayModeImage();
+        registerBoradcastReceiver();
     }
 
     private void initPlayView() {
@@ -203,10 +204,13 @@ public abstract class WithPlayerBaseActivity extends Activity {
                     int playMode = PreferencesUtils.getInt(getContext(), "playMode", Constants.ORDER_PLAY_MODE);
                     if (playMode == Constants.ORDER_PLAY_MODE) {
                         PreferencesUtils.putInt(getContext(), "playMode", Constants.RANDOM_PLAY_MODE);
+                        RobotToastUtil.getInstance(getContext()).showToast("已切换随机播放");
                     } else if (playMode == Constants.RANDOM_PLAY_MODE) {
                         PreferencesUtils.putInt(getContext(), "playMode", Constants.CIRCEL_PLAY_MODE);
+                        RobotToastUtil.getInstance(getContext()).showToast("已切换循环播放");
                     } else if (playMode == Constants.CIRCEL_PLAY_MODE) {
                         PreferencesUtils.putInt(getContext(), "playMode", Constants.ORDER_PLAY_MODE);
+                        RobotToastUtil.getInstance(getContext()).showToast("已切换顺序播放");
                     }
                     updatePlayModeImage();
                     break;
@@ -303,6 +307,16 @@ public abstract class WithPlayerBaseActivity extends Activity {
         ListView listView = (ListView) contentView.findViewById(R.id.pop_list_view);
         popupWindowAdapter = new PopupWindowAdapter(this, historyBeanList, id);
         listView.setAdapter(popupWindowAdapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                int audioId = historyBeanList.get(position).getId();
+                int audioType = historyBeanList.get(position).getType();
+                getData(audioId, audioType);
+            }
+        });
+
         popupWindow.showUp(playHistoryImg);
     }
 
@@ -376,7 +390,7 @@ public abstract class WithPlayerBaseActivity extends Activity {
 
     private void updateSeekBak() {
         if (application.mediaPlayService != null && application.mediaPlayService.mediaPlayer != null) {
-            if (application.mediaPlayService.getMediaPlayer().isPlaying()) {
+            if (application.mediaPlayService.mediaPlayer.isPlaying()) {
                 int currentPosition = application.mediaPlayService.mediaPlayer.getCurrentPosition();
                 progressBar.setProgress(currentPosition / 1000);
                 currentPlayTimeTv.setText(TimeUtils.ShowTime(currentPosition));
@@ -531,4 +545,27 @@ public abstract class WithPlayerBaseActivity extends Activity {
         return historyBean;
     }
 
+    public void registerBoradcastReceiver() {
+        IntentFilter myIntentFilter = new IntentFilter();
+        myIntentFilter.addAction(Constants.ACTION_NAME);
+        //注册广播
+        registerReceiver(mBroadcastReceiver, myIntentFilter);
+    }
+
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(Constants.ACTION_NAME)) {
+                updatePlayerView();
+            }
+        }
+
+    };
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mBroadcastReceiver);
+    }
 }

@@ -31,6 +31,13 @@ public class TagContentAdapter extends BaseAdapter {
         inflater = LayoutInflater.from(context);
     }
 
+    public TagContentAdapter(Context context, List<SearchItemBean> list, String str) {
+        this.context = context;
+        this.list = list;
+        this.str = str;
+        inflater = LayoutInflater.from(context);
+    }
+
     public void updateSelectedView(String str) {
         this.str = str;
         notifyDataSetChanged();
@@ -68,7 +75,7 @@ public class TagContentAdapter extends BaseAdapter {
 //        if (text.equals(str)) {
 //            viewHolder.textView.setBackgroundResource(R.color.selected_color);
 //        } else {
-//            viewHolder.textView.setBackgroundResource(R.color.selected_color);
+//            viewHolder.textView.setBackgroundResource(R.color.unselected_color);
 //        }
 
         return view;

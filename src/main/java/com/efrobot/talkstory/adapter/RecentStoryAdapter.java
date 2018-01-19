@@ -10,14 +10,18 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.efrobot.talkstory.R;
 import com.efrobot.talkstory.TalkStoryApplication;
 import com.efrobot.talkstory.bean.AudiaItemBean;
 import com.efrobot.talkstory.bean.VersionBean;
 import com.efrobot.talkstory.env.Constants;
 import com.efrobot.talkstory.play.PlayMediaActivity;
+import com.efrobot.talkstory.utils.OptionsUtils;
 import com.efrobot.talkstory.utils.TimeUtils;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.imageaware.ImageAware;
+import com.nostra13.universalimageloader.core.imageaware.ImageViewAware;
 import com.zhy.view.flowlayout.FlowLayout;
 import com.zhy.view.flowlayout.TagAdapter;
 import com.zhy.view.flowlayout.TagFlowLayout;
@@ -96,13 +100,15 @@ public class RecentStoryAdapter extends BaseAdapter {
 
         final AudiaItemBean data = list.get(i);
 
-        if (!TextUtils.isEmpty(data.getBigImg()))
-//            x.image().bind(viewHolder.imageView, data.getBigImg(), options);
-            imageLoader.displayImage(data.getBigImg(), viewHolder.imageView);
+        if (!TextUtils.isEmpty(data.getBigImg())) {
+//            ImageAware imageAware = new ImageViewAware(viewHolder.imageView, false);
+//            imageLoader.displayImage(data.getBigImg(), imageAware);
+            Glide.with(context).load(data.getBigImg()).apply(OptionsUtils.getInstance().getGlideOption()).into(viewHolder.imageView);
+        }
 
         if (!TextUtils.isEmpty(data.getTeacherImg()))
-//            x.image().bind(viewHolder.authorImage, data.getTeacherImg(), options);
-            imageLoader.displayImage(data.getTeacherImg(), viewHolder.authorImage);
+            Glide.with(context).load(data.getTeacherImg()).apply(OptionsUtils.getInstance().getGlideOption()).into(viewHolder.authorImage);
+//            imageLoader.displayImage(data.getTeacherImg(), viewHolder.authorImage);
 
         viewHolder.storyFrom.setText(data.getTeacherName() + "  " + data.getAlbumName());
         viewHolder.storyTitle.setText(data.getName());

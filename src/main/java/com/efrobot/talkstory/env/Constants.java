@@ -5,6 +5,9 @@ package com.efrobot.talkstory.env;
  */
 public class Constants {
 
+    public final String ACTION_NAME = "com.efrobot.talkstory.UPDATA_PLAYER_INFO";
+
+
     //首页请求码
     public static final int MAIN_REQUEST_REQUEST = 1;
     //首页刷新返回码

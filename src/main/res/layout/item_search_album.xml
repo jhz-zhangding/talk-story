@@ -14,9 +14,9 @@
     <TextView
         android:id="@+id/album_title"
         android:layout_width="150dp"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
+        android:minHeight="60dp"
         android:gravity="center_vertical"
-        android:maxLines="2"
         android:text=""
         android:textColor="#BB333333"
         android:textSize="16sp" />
@@ -35,7 +35,7 @@
             android:id="@+id/album_author_image"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:src="@mipmap/ic_launcher"
+            android:src="@mipmap/default_image"
             />
 
         <TextView

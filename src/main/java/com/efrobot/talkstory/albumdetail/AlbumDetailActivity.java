@@ -121,7 +121,7 @@ public class AlbumDetailActivity extends WithPlayerBaseActivity implements View.
             title.setText(album.getName());
 
             if (!TextUtils.isEmpty(album.getTeacherImg()))
-                ImageLoader.getInstance().displayImage(album.getTeacherImg(), teacherImage);
+                ImageLoader.getInstance().displayImage(album.getTeacherImg(), teacherImage, OptionsUtils.getInstance().getCircelOption());
             authorName.setText(album.getTeacherName());
             total.setText(album.getAudioCount() + "个故事");
 

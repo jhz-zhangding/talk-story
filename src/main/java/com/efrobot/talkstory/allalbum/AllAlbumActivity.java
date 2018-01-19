@@ -62,6 +62,8 @@ public class AllAlbumActivity extends WithPlayerBaseActivity implements PullToRe
         initView();
         initListener();
         getHttpData();
+
+        updatePlayerView();
     }
 
     protected void initView() {

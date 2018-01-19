@@ -15,8 +15,7 @@
         android:layout_height="wrap_content"
         android:textColor="@color/black"
         android:textSize="18sp"
-        android:maxLines="2"
-        android:minHeight="50dp"
+        android:minHeight="60dp"
         />
 
     <LinearLayout

@@ -16,6 +16,8 @@ import com.danikula.videocache.CacheListener;
 import com.danikula.videocache.HttpProxyCacheServer;
 import com.efrobot.library.mvp.utils.L;
 import com.efrobot.talkstory.TalkStoryApplication;
+import com.efrobot.talkstory.bean.AudiaItemBean;
+import com.efrobot.talkstory.bean.HistoryBean;
 import com.efrobot.talkstory.bean.VersionBean;
 import com.efrobot.talkstory.env.Constants;
 import com.efrobot.talkstory.env.PlayListCache;
@@ -77,17 +79,31 @@ public class MediaPlayService extends Service implements CacheListener {
     }
 
     private void startVideo() {
-        proxy.registerCacheListener(this, VIDEO_URL);
-        String proxyUrl = proxy.getProxyUrl(VIDEO_URL);
-        Log.d(TAG, "Use proxy url " + proxyUrl + " instead of original url " + VIDEO_URL);
-        try {
-            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                mediaPlayer.reset();
+        if (!TextUtils.isEmpty(VIDEO_URL)) {
+            proxy.registerCacheListener(this, VIDEO_URL);
+            String proxyUrl = proxy.getProxyUrl(VIDEO_URL);
+            Log.d(TAG, "Use proxy url " + proxyUrl + " instead of original url " + VIDEO_URL);
+            try {
+                if (mediaPlayer != null) {
+                    if (mediaPlayer.isPlaying()) {
+                        mediaPlayer.stop();
+                    }
+                    mediaPlayer.release();
+                    //为了防止第二次播放的bug，重新生成MediaPlayer播放器
+                    mediaPlayer = new MediaPlayer();
+                    mediaPlayer.setOnPreparedListener(onPreparedListener);
+                    mediaPlayer.setOnCompletionListener(onCompletionListener);
+                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                    mediaPlayer.setDataSource(proxyUrl);
+                    mediaPlayer.prepareAsync();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
             }
-            mediaPlayer.setDataSource(proxyUrl);
-            mediaPlayer.prepareAsync();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } else {
+            Log.d(TAG, "VIDEO_URL为空 " + VIDEO_URL);
         }
     }
 
@@ -110,6 +126,8 @@ public class MediaPlayService extends Service implements CacheListener {
     };
 
     private List<VersionBean> versionBeen;
+    private AudiaItemBean audiaItemBean;
+    private VersionBean versionBean;
 
     private void startPlayNext() {
         boolean isContains = false;
@@ -118,6 +136,7 @@ public class MediaPlayService extends Service implements CacheListener {
             for (int i = 0; i < PlayListCache.list.size(); i++) {
                 int id = PlayListCache.list.get(i).getId();
                 if (id == VIDEO_ID) {
+                    audiaItemBean = PlayListCache.list.get(i);
                     versionBeen = PlayListCache.list.get(i).getVersions();
                     nextAudioIndex = i;
                     isContains = true;
@@ -142,6 +161,7 @@ public class MediaPlayService extends Service implements CacheListener {
                 }
                 if (nextVersionIndex < versionBeen.size()) {
                     //对于多版本故事，默认先播放第一版本，再播放第二版本
+                    versionBean = versionBeen.get(nextVersionIndex);
                     VIDEO_URL = versionBeen.get(nextVersionIndex).getAudioUrl();
                 } else {
                     //版本都播完，开始播放下一个故事
@@ -164,9 +184,15 @@ public class MediaPlayService extends Service implements CacheListener {
                     if (nextAudioIndex < PlayListCache.list.size()) {
                         versionBeen = PlayListCache.list.get(nextAudioIndex).getVersions();
                         if (versionBeen != null && versionBeen.size() > 0) {
-                            VIDEO_URL = PlayListCache.list.get(nextAudioIndex).getVersions().get(0).getAudioUrl();
+                            versionBean = PlayListCache.list.get(nextAudioIndex).getVersions().get(0);
+                            VIDEO_URL = versionBean.getAudioUrl();
                         }
                     }
+                }
+                if (audiaItemBean != null && versionBean != null) {
+                    Intent mIntent = new Intent(Constants.ACTION_NAME);
+                    //发送广播
+                    sendBroadcast(mIntent);
                 }
                 startVideo();
             }
@@ -198,6 +224,18 @@ public class MediaPlayService extends Service implements CacheListener {
         }
     }
 
+    //注意seekBar传入的是毫秒级，不是秒
+    public void seekTo(int seekBarPotion) {
+        application.isPlayingStory = true;
+        currentPosition = seekBarPotion;
+        if (currentPosition >= 0) {
+            mediaPlayer.start();
+            mediaPlayer.seekTo(currentPosition * 1000);
+        } else {
+            mediaPlayer.start();
+        }
+    }
+
     @Override
     public void onCacheAvailable(File cacheFile, String url, int percentsAvailable) {
 //        progressBar.setSecondaryProgress(percentsAvailable);
@@ -210,6 +248,21 @@ public class MediaPlayService extends Service implements CacheListener {
         if (fullyCached) {
 //            progressBar.setSecondaryProgress(100);
         }
+    }
+
+    private HistoryBean gerateHistoryData(AudiaItemBean audiaItemBean, VersionBean versionBean) {
+        HistoryBean historyBean = new HistoryBean();
+        if (audiaItemBean != null && versionBean != null) {
+            historyBean.setId(audiaItemBean.getId());
+            historyBean.setName(audiaItemBean.getName());
+            historyBean.setTeacherName(audiaItemBean.getTeacherName());
+            historyBean.setSmallImg(audiaItemBean.getSmallImg());
+            historyBean.setAudioPath(versionBean.getAudioPath());
+            historyBean.setAudioUrl(versionBean.getAudioUrl());
+            historyBean.setPlayTime(versionBean.getPlayTime());
+            historyBean.setType(versionBean.getType());
+        }
+        return historyBean;
     }
 
 

@@ -10,6 +10,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.efrobot.talkstory.R;
 import com.efrobot.talkstory.bean.AlbumBean;
 import com.efrobot.talkstory.bean.AlbumItemBean;
@@ -87,15 +89,19 @@ public class AlbumAdapter extends BaseAdapter {
 
         AlbumItemBean data = list.get(i);
         if (!TextUtils.isEmpty(data.getImage())) {
-            ImageAware imageAware = new ImageViewAware(viewHolder.albumImage, false);
-            imageLoader.displayImage(data.getImage(), imageAware);
+            Glide.with(context).load(data.getImage()).apply(OptionsUtils.getInstance().getGlideOption()).into(viewHolder.albumImage);
+
+//            ImageAware imageAware = new ImageViewAware(viewHolder.albumImage, false);
+//            imageLoader.displayImage(data.getImage(), imageAware);
         }
 
         viewHolder.albumTitle.setText(data.getName());
 
         if (!TextUtils.isEmpty(data.getTeacherImg())) {
-            ImageAware imageAware = new ImageViewAware(viewHolder.authorImage, false);
-            imageLoader.displayImage(data.getTeacherImg(), imageAware, OptionsUtils.getInstance().getCircelOption());
+            Glide.with(context).load(data.getTeacherImg()).apply(RequestOptions.circleCropTransform()).into(viewHolder.authorImage);
+
+//            ImageAware imageAware = new ImageViewAware(viewHolder.authorImage, false);
+//            imageLoader.displayImage(data.getTeacherImg(), imageAware, OptionsUtils.getInstance().getCircelOption());
         }
 
         viewHolder.authorName.setText(data.getTeacherName());

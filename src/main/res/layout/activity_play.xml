@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:gravity="center_vertical"
     tools:context=".play.PlayMediaActivity">
+
+    <ImageView
+        android:id="@+id/play_parent_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        />
 
     <TextView
         android:id="@+id/play_back_btn"
@@ -47,21 +54,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp"
-            >
+            android:layout_marginTop="20dp">
+
             <com.efrobot.talkstory.utils.CircleImageView
+                android:id="@+id/rotate_image_background"
                 android:layout_width="400dp"
                 android:layout_height="400dp"
-                android:src="#FD9825"
-                />
+                android:layout_gravity="center" />
 
             <com.efrobot.talkstory.utils.CircleImageView
                 android:id="@+id/rotate_image"
-                android:layout_width="400dp"
-                android:layout_height="400dp"
-                app:civ_border_width="4dp"
-                app:civ_border_color="#FFFD9825"
-                />
+                android:layout_width="350dp"
+                android:layout_height="350dp"
+                android:layout_gravity="center"
+                app:civ_border_color="#00000000"
+                app:civ_border_width="4dp" />
 
         </FrameLayout>
 
@@ -129,8 +136,9 @@
 
             <ImageView
                 android:id="@+id/play_mode_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:padding="10dp"
                 android:background="@mipmap/player_random" />
 
             <ImageView

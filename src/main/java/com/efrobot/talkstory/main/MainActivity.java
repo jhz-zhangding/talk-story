@@ -6,6 +6,7 @@ import android.os.PersistableBundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -26,6 +27,7 @@ import com.efrobot.talkstory.bean.AlbumItemBean;
 import com.efrobot.talkstory.bean.AudiaBean;
 import com.efrobot.talkstory.bean.AudiaItemBean;
 import com.efrobot.talkstory.bean.HistoryBean;
+import com.efrobot.talkstory.bean.VersionBean;
 import com.efrobot.talkstory.db.HistoryManager;
 import com.efrobot.talkstory.env.Constants;
 import com.efrobot.talkstory.env.PlayListCache;
@@ -44,7 +46,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class MainActivity extends WithPlayerBaseActivity implements View.OnClickListener, PullToRefreshLayout.OnPullListener {
+public class MainActivity extends WithPlayerBaseActivity implements View.OnClickListener, PullToRefreshLayout.OnPullListener, AbsListView.OnScrollListener {
 
     private final String TAG = MainActivity.class.getSimpleName();
 
@@ -73,6 +75,9 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
     private TalkStoryApplication application;
 
     private int lastid = 0;
+
+    private int visibleItemCount;
+    private int visibleLastIndex;
 
     @Override
     protected int getZdContentView() {
@@ -107,6 +112,12 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
         setListener();
         setHttpData();
 
+        setFirstIntoHistoryData();
+    }
+
+    private boolean isNeedSetHistory = false;
+
+    private void setFirstIntoHistoryData() {
         //设置历史记录
         List<HistoryBean> historyBeanList = HistoryManager.getInstance(this).queryAllContent();
         if (historyBeanList != null && historyBeanList.size() > 0) {
@@ -116,8 +127,10 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
                     break;
                 }
             }
-            updatePlayerView();
+        } else {
+            isNeedSetHistory = true;
         }
+        updatePlayerView();
     }
 
     @Override
@@ -169,6 +182,13 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
                 AudiaBean audiaBean = new Gson().fromJson(result, AudiaBean.class);
                 if (audiaBean != null && audiaBean.getData() != null) {
                     if (audiaBean.getData().size() > 0) {
+
+                        /**防止第一次进入没有历史记录从而底部播放器没有内容**/
+                        if (application.getCurrentPlayBean() == null) {
+                            application.setCurrentPlayBean(gerateHistoryData(audiaBean.getData().get(0)));
+                            updatePlayerView();
+                        }
+
                         recentStoryBeanList.addAll(audiaBean.getData());
                         setAudioAdapterData();
                     } else {
@@ -192,6 +212,23 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
 
             }
         });
+    }
+
+    private HistoryBean gerateHistoryData(AudiaItemBean audiaItemBean) {
+        HistoryBean historyBean = new HistoryBean();
+        historyBean.setId(audiaItemBean.getId());
+        historyBean.setName(audiaItemBean.getName());
+        historyBean.setTeacherName(audiaItemBean.getTeacherName());
+        historyBean.setSmallImg(audiaItemBean.getSmallImg());
+
+        if (audiaItemBean.getVersions() != null && audiaItemBean.getVersions().size() > 0) {
+            VersionBean versionBean = audiaItemBean.getVersions().get(0);
+            historyBean.setAudioPath(versionBean.getAudioPath());
+            historyBean.setAudioUrl(versionBean.getAudioUrl());
+            historyBean.setPlayTime(versionBean.getPlayTime());
+            historyBean.setType(versionBean.getType());
+        }
+        return historyBean;
     }
 
     private void setListener() {
@@ -237,6 +274,17 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
     public void onLoadMore(PullToRefreshLayout pullToRefreshLayout) {
         getAudioList();
         pullToRefreshLayout.refreshFinish(PullToRefreshLayout.SUCCEED);
+    }
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        this.visibleItemCount = visibleItemCount;
+        visibleLastIndex = firstVisibleItem + visibleItemCount - 1;
     }
 
     private class AlbumItemClickListener implements AdapterView.OnItemClickListener {

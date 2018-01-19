@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -42,12 +43,14 @@ public class SearchPageActivity extends BaseActivity implements PullToRefreshLay
 
     private HttpUtils httpUtils;
 
+    private TextView allSearchBtn;
+
     private EditText searchEt;
     private TextView startSearchBtn;
 
     private PullToRefreshLayout prl1;
 
-    private ListView tagListView;
+    private ExpandableListView tagListView;
     private TagListApdater tagListApdater;
     private List<SearchDataBean> tagList = new ArrayList<>();
 
@@ -95,7 +98,7 @@ public class SearchPageActivity extends BaseActivity implements PullToRefreshLay
     }
 
     private void initView() {
-        tagListView = (ListView) findViewById(R.id.search_tag_list_view);
+        tagListView = (ExpandableListView) findViewById(R.id.search_tag_list_view);
 
         pullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.refresh_view);
 
@@ -112,12 +115,40 @@ public class SearchPageActivity extends BaseActivity implements PullToRefreshLay
         startSearchBtn = (TextView) findViewById(R.id.main_search_edit_btn);
 
         startSearchBtn.setOnClickListener(this);
-        findViewById(R.id.tag_all_btn).setOnClickListener(this);
+        findViewById(R.id.back).setOnClickListener(this);
+        allSearchBtn = (TextView) findViewById(R.id.tag_all_btn);
         albumGridView.setOnItemClickListener(new AlbumItemClickListener());
         audioListView.setOnItemClickListener(new RecentStoryItemClickListener());
+
+        allSearchBtn.setOnClickListener(this);
         imageLeft.setOnClickListener(this);
         imageRight.setOnClickListener(this);
         pullToRefreshLayout.setOnPullListener(this);
+
+        tagListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+                return true;
+            }
+        });
+
+        tagListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                tagId = tagList.get(groupPosition).getList().get(childPosition).getId();
+                page = 1;
+                audioList.clear();
+                getHttpAlbumData();
+                getHttpAudioData();
+
+                if (tagListApdater != null) {
+                    String str = tagList.get(groupPosition).getList().get(childPosition).getName();
+                    tagListApdater.updateSelected(str);
+                }
+
+                return false;
+            }
+        });
     }
 
     private class AlbumItemClickListener implements AdapterView.OnItemClickListener {
@@ -155,7 +186,7 @@ public class SearchPageActivity extends BaseActivity implements PullToRefreshLay
                 SearchMainBean searchMainBean = new Gson().fromJson(result, SearchMainBean.class);
                 if (searchMainBean != null && searchMainBean.getData() != null) {
                     if (searchMainBean.getData().size() > 0) {
-                        tagList.addAll(searchMainBean.getData());
+                        tagList = searchMainBean.getData();
                         setTagAdapter();
                     } else {
                         Toast.makeText(getContext(), "已经没有数据了", Toast.LENGTH_SHORT).show();
@@ -256,18 +287,15 @@ public class SearchPageActivity extends BaseActivity implements PullToRefreshLay
     private void setTagAdapter() {
         if (tagListApdater == null) {
             tagListApdater = new TagListApdater(this, tagList);
-            tagListApdater.setOnTagClickItemListener(new TagListApdater.OnTagClickItemListener() {
-                @Override
-                public void onClick(int targetId) {
-                    tagId = targetId;
-                    page = 1;
-                    audioList.clear();
-                    getHttpData();
-                }
-            });
             tagListView.setAdapter(tagListApdater);
         } else {
             tagListApdater.notifyDataSetChanged();
+        }
+
+        if (tagList != null) {
+            for (int i = 0; i < tagList.size(); i++) {
+                tagListView.expandGroup(i);
+            }
         }
     }
 
@@ -299,6 +327,9 @@ public class SearchPageActivity extends BaseActivity implements PullToRefreshLay
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
+            case R.id.back:
+                finishAfter();
+                break;
             case R.id.main_search_edit_btn:
                 /**
                  * 重新搜索内容
@@ -326,6 +357,17 @@ public class SearchPageActivity extends BaseActivity implements PullToRefreshLay
         }
     }
 
+    private void finishAfter() {
+        setResult(Constants.UPDATE_PROGRESS_RESULT, new Intent());
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        finishAfter();
+        super.onBackPressed();
+    }
+
     private void againSearch() {
         keyword = searchEt.getText().toString();
         tagId = 0;
@@ -335,5 +377,8 @@ public class SearchPageActivity extends BaseActivity implements PullToRefreshLay
         albumPage = 1;
 
         getHttpData();
+        if (tagListApdater != null) {
+            tagListApdater.updateSelected("");
+        }
     }
 }

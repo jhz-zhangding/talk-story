@@ -2,6 +2,8 @@ package com.efrobot.talkstory.utils;
 
 import android.graphics.Bitmap;
 
+import com.bumptech.glide.Priority;
+import com.bumptech.glide.request.RequestOptions;
 import com.efrobot.talkstory.R;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.display.SimpleBitmapDisplayer;
@@ -34,13 +36,34 @@ public class OptionsUtils {
     public DisplayImageOptions getCircelOption() {
         //圆形图片
         DisplayImageOptions options3 = new DisplayImageOptions.Builder()
+                .showImageOnLoading(R.mipmap.default_image)
                 .showImageForEmptyUri(R.mipmap.default_image)
+                .showImageOnFail(R.mipmap.default_image)
                 .cacheInMemory(true)
                 .cacheOnDisc(true)
                 .bitmapConfig(Bitmap.Config.ARGB_8888)   //设置图片的解码类型
                 .displayer(new Displayer(0))
                 .build();
         return options3;
+    }
+
+    public RequestOptions getGlideOption() {
+        RequestOptions options = new RequestOptions()
+                .centerCrop()
+                .placeholder(R.mipmap.default_image)
+                .error(R.mipmap.default_image)
+                .priority(Priority.HIGH);
+        return options;
+    }
+
+    public RequestOptions getCircleGlideOption() {
+        RequestOptions options = new RequestOptions()
+                .centerCrop()
+                .placeholder(R.mipmap.default_image)
+                .error(R.mipmap.default_image)
+                .priority(Priority.HIGH)
+                .transform(new GlideCircleTransform());
+        return options;
     }
 
 }
