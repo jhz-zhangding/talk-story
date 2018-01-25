@@ -47,6 +47,11 @@ public class OptionsUtils {
         return options3;
     }
 
+    /**
+     * Glide基礎參數
+     *
+     * @return
+     */
     public RequestOptions getGlideOption() {
         RequestOptions options = new RequestOptions()
                 .centerCrop()
@@ -56,6 +61,11 @@ public class OptionsUtils {
         return options;
     }
 
+    /**
+     * Glide获取圆形圖片
+     *
+     * @return
+     */
     public RequestOptions getCircleGlideOption() {
         RequestOptions options = new RequestOptions()
                 .centerCrop()
@@ -63,6 +73,21 @@ public class OptionsUtils {
                 .error(R.mipmap.default_image)
                 .priority(Priority.HIGH)
                 .transform(new GlideCircleTransform());
+        return options;
+    }
+
+    /**
+     * Glide获取圆角图片
+     *
+     * @return
+     */
+    public RequestOptions getRoundGlideOption(int radius) {
+        RequestOptions options = new RequestOptions()
+                .centerCrop()
+                .placeholder(R.mipmap.default_image)
+                .error(R.mipmap.default_image)
+                .priority(Priority.HIGH)
+                .transform(new GlideRoundTransform(radius));
         return options;
     }
 

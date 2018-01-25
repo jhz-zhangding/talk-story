@@ -24,6 +24,7 @@ import com.efrobot.talkstory.bean.AlbumItemBean;
 import com.efrobot.talkstory.bean.AudiaBean;
 import com.efrobot.talkstory.bean.AudiaItemBean;
 import com.efrobot.talkstory.env.Constants;
+import com.efrobot.talkstory.env.PlayListCache;
 import com.efrobot.talkstory.http.HttpParamUtils;
 import com.efrobot.talkstory.http.HttpUtils;
 import com.efrobot.talkstory.play.PlayMediaActivity;
@@ -80,7 +81,13 @@ public class SearchPageActivity extends BaseActivity implements PullToRefreshLay
     public static void openSearchActivity(Context context, Class cls, String searchStr) {
         Intent intent = new Intent(context, cls);
         intent.putExtra("keyWord", searchStr);
-        ((Activity) context).startActivity(intent);
+        context.startActivity(intent);
+    }
+
+    public static void openSearchActivity(Context context, Class cls, String searchStr, int requestCode) {
+        Intent intent = new Intent(context, cls);
+        intent.putExtra("keyWord", searchStr);
+        ((Activity) context).startActivityForResult(intent, requestCode);
     }
 
 
@@ -166,6 +173,9 @@ public class SearchPageActivity extends BaseActivity implements PullToRefreshLay
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             if (i != 0) {
+                //搜索页面点击播放后重新生成播放列表
+                PlayListCache.getInstance(getContext()).setList(audioList);
+
                 PlayMediaActivity.openActivity(getContext(), PlayMediaActivity.class, audioList.get(i - 1), Constants.MAIN_REQUEST_REQUEST);
             }
         }
@@ -214,13 +224,13 @@ public class SearchPageActivity extends BaseActivity implements PullToRefreshLay
 
     private void getHttpAlbumData() {
         httpUtils = new HttpUtils(isInvalidToken);
-        Map<String, Object> albumMap = HttpParamUtils.getAlbumParamMap(albumPage, 5, keyword, tagId);
+        Map<String, Object> albumMap = HttpParamUtils.getAlbumParamMap(albumPage, 4, keyword, tagId);
         httpUtils.Post(HttpParamUtils.ALBUM_LIST_URL, albumMap, new Callback.CommonCallback<String>() {
             @Override
             public void onSuccess(String result) {
                 L.e(TAG, "onSuccess:" + result);
                 AlbumBean albumBean = new Gson().fromJson(result, AlbumBean.class);
-                if (albumBean != null && albumBean.getData() != null) {
+                if (albumBean != null && albumBean.getData() != null && albumBean.getData().size() > 0) {
                     albumBeanList = albumBean.getData();
                     albumAdapter = new AlbumSearchAdapter(getContext(), albumBeanList);
                     albumGridView.setAdapter(albumAdapter);
@@ -328,6 +338,8 @@ public class SearchPageActivity extends BaseActivity implements PullToRefreshLay
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.back:
+                L.e("BaseActivity", "screenWidth = " + getScreenWidth() + "  screenHeight = " + getScreenHeight());
+
                 finishAfter();
                 break;
             case R.id.main_search_edit_btn:

@@ -28,18 +28,17 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:25.3.1'
-
     compile 'com.efrobot.library.net:mvpnetlibrary:2.0.6'
     compile 'com.danikula:videocache:2.7.0'
-//    compile 'de.hdodenhof:circleimageview:2.2.0'
+    //    compile 'de.hdodenhof:circleimageview:2.2.0'
     compile 'com.song:circleimage:1.0.1'
     //刷新库
     compile project(':pullToRefreshlibrary')
     compile 'org.xutils:xutils:3.4.0'
     compile 'com.google.code.gson:gson:2.8.2'
     compile 'com.hyman:flowlayout-lib:1.1.2'
-
+    compile 'com.android.support:recyclerview-v7:25.3.1'
 }

@@ -1,6 +1,7 @@
 package com.efrobot.talkstory.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.text.Layout;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -156,9 +157,9 @@ public class RecentStoryAdapter extends BaseAdapter {
             if (application.getCurrentPlayBean() != null) {
                 if (!TextUtils.isEmpty(application.getCurrentPlayBean().getAudioUrl())) {
                     if (o.getAudioUrl().equals(application.getCurrentPlayBean().getAudioUrl())) {
-                        textView.setBackgroundResource(R.drawable.bg_language_selected);
+                        setBackgroundColor(o.getType(), textView, true);
                     } else {
-                        textView.setBackgroundResource(R.drawable.bg_language_unselected);
+                        setBackgroundColor(o.getType(), textView, false);
                     }
                 }
             } else {
@@ -167,6 +168,56 @@ public class RecentStoryAdapter extends BaseAdapter {
             return textView;
         }
 
+    }
+
+    //双语
+    private final int DOUBLE_LANGUAGE = 1;
+    //纯英
+    private final int ENGLISH_LANGUAGE = 2;
+    //中文
+    private final int CHINESE_LANGUAGE = 3;
+    //原版
+    private final int SOURCE_LANGUAGE = 4;
+
+    private void setBackgroundColor(int type, TextView textView, boolean isSelected) {
+        switch (type) {
+            case DOUBLE_LANGUAGE:
+                if (isSelected) {
+                    textView.setBackgroundResource(R.drawable.double_language_selected);
+                    textView.setTextColor(Color.WHITE);
+                } else {
+                    textView.setBackgroundResource(R.drawable.double_language_unselected);
+                    textView.setTextColor(Color.parseColor("#FF60C1D6"));
+                }
+                break;
+            case ENGLISH_LANGUAGE:
+                if (isSelected) {
+                    textView.setBackgroundResource(R.drawable.english_language_selected);
+                    textView.setTextColor(Color.WHITE);
+                } else {
+                    textView.setBackgroundResource(R.drawable.english_language_unselected);
+                    textView.setTextColor(Color.parseColor("#FFE98C8C"));
+                }
+                break;
+            case CHINESE_LANGUAGE:
+                if (isSelected) {
+                    textView.setBackgroundResource(R.drawable.chinese_language_selected);
+                    textView.setTextColor(Color.WHITE);
+                } else {
+                    textView.setBackgroundResource(R.drawable.chinese_language_unselected);
+                    textView.setTextColor(Color.parseColor("#FFF5A623"));
+                }
+                break;
+            case SOURCE_LANGUAGE:
+                if (isSelected) {
+                    textView.setBackgroundResource(R.drawable.source_language_selected);
+                    textView.setTextColor(Color.WHITE);
+                } else {
+                    textView.setBackgroundResource(R.drawable.source_language_unselected);
+                    textView.setTextColor(Color.parseColor("#cccccc"));
+                }
+                break;
+        }
     }
 
 

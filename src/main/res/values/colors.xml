@@ -5,6 +5,14 @@
     <color name="background">#F7F4F0</color>
     <color name="title_color">#333333</color>
 
+    <color name="main_bar_color">#60D67D</color>
+    <color name="album_detail_color">#FF60D67D</color>
+    <color name="main_bar_search_btn_color">#43BC61</color>
+    <color name="album_item_teacher_name_color">#FF333333</color>
+    <color name="album_item_image_bg_color">#FFD8D8D8</color>
+    <color name="text_ff999999">#FF999999</color>
+    <color name="tag_list_item_bg">#FFF0F0F0</color>
+
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
@@ -29,9 +37,8 @@
     <color name="base_text99">#99CCCCCC</color>
     <color name="base_text55">#55CCCCCC</color>
 
-    <color name="selected_color">#ddd</color>
-    <color name="unselected_color">#fff</color>
-
+    <color name="selected_color">#FFFFFFFF</color>
+    <color name="unselected_color">#FFF0F0F0</color>
 
 
 </resources>

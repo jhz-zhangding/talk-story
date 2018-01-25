@@ -5,7 +5,7 @@ package com.efrobot.talkstory.env;
  */
 public class Constants {
 
-    public final String ACTION_NAME = "com.efrobot.talkstory.UPDATA_PLAYER_INFO";
+    public static String ACTION_NAME = "com.efrobot.talkstory.UPDATA_PLAYER_INFO";
 
 
     //首页请求码
@@ -23,5 +23,8 @@ public class Constants {
 
     //循环播放
     public static final int CIRCEL_PLAY_MODE = 3;
+
+    //存储数据
+    public static final String MUSIC_LIST_DATA_CACHE = "music_list_data_cache";
 
 }

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/search_window_height"
+    android:background="@color/main_bar_color"
+    android:gravity="center">
+
+    <EditText
+        android:id="@+id/main_search_edit"
+        android:layout_width="418.8dp"
+        android:layout_height="@dimen/search_edit_height"
+        android:background="@drawable/shape_search_edit_bg"
+        android:hint="@string/search_hint"
+        android:paddingLeft="10dp"
+        android:textColorHint="@color/text_ff999999"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/main_search_edit_btn"
+        android:layout_width="100dp"
+        android:layout_height="@dimen/search_edit_height"
+        android:layout_toRightOf="@+id/main_search_edit"
+        android:background="@drawable/shape_search_bg"
+        android:gravity="center"
+        android:text="@string/search"
+        android:textColor="@color/white"
+        android:textSize="20sp" />
+</RelativeLayout>

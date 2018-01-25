@@ -3,6 +3,8 @@ package com.efrobot.talkstory.main;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -17,9 +19,10 @@ import com.efrobot.library.mvp.utils.L;
 import com.efrobot.library.mvp.utils.PreferencesUtils;
 import com.efrobot.talkstory.R;
 import com.efrobot.talkstory.TalkStoryApplication;
-import com.efrobot.talkstory.adapter.AlbumAdapter;
+import com.efrobot.talkstory.adapter.AlbumItemDecortion;
 import com.efrobot.talkstory.adapter.RecentStoryAdapter;
 import com.efrobot.talkstory.albumdetail.AlbumDetailActivity;
+import com.efrobot.talkstory.adapter.AlbumRecylerAdapter;
 import com.efrobot.talkstory.allalbum.AllAlbumActivity;
 import com.efrobot.talkstory.base.WithPlayerBaseActivity;
 import com.efrobot.talkstory.bean.AlbumBean;
@@ -35,7 +38,6 @@ import com.efrobot.talkstory.http.HttpParamUtils;
 import com.efrobot.talkstory.http.HttpUtils;
 import com.efrobot.talkstory.play.PlayMediaActivity;
 import com.efrobot.talkstory.search.SearchPageActivity;
-import com.efrobot.talkstory.utils.HorizontalListView;
 import com.google.gson.Gson;
 import com.jingchen.pulltorefresh.PullToRefreshLayout;
 
@@ -57,10 +59,10 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
 
     private PullToRefreshLayout ptrl;
 
-    private HorizontalListView albumGridView;
+    private RecyclerView albumGridView;
     private GridView recentStoryGridView;
 
-    private AlbumAdapter albumAdapter;
+    private AlbumRecylerAdapter albumAdapter;
     private RecentStoryAdapter recentStoryAdapter;
 
     private List<AlbumItemBean> albumBeanList;
@@ -104,7 +106,11 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
         startSearchBtn = (TextView) findViewById(R.id.main_search_edit_btn);
         ptrl = (PullToRefreshLayout) findViewById(R.id.refresh_view);
         recentStoryGridView = (GridView) findViewById(R.id.recent_story_grid_view);
-        albumGridView = (HorizontalListView) findViewById(R.id.competitive_products_grid_view);
+        albumGridView = (RecyclerView) findViewById(R.id.competitive_products_grid_view);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        albumGridView.addItemDecoration(new AlbumItemDecortion(52));
+        albumGridView.setLayoutManager(linearLayoutManager);
 
         albumBeanList = new ArrayList<>();
         recentStoryBeanList = new ArrayList<>();
@@ -124,6 +130,7 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
             for (int i = 0; i < historyBeanList.size(); i++) {
                 if (historyBeanList.get(i).getId() == lastid) {
                     application.setCurrentPlayBean(historyBeanList.get(i));
+                    isNeedSetHistory = false;
                     break;
                 }
             }
@@ -147,7 +154,17 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
                 AlbumBean albumBean = new Gson().fromJson(result, AlbumBean.class);
                 if (albumBean != null && albumBean.getData() != null) {
                     albumBeanList = albumBean.getData();
-                    albumAdapter = new AlbumAdapter(MainActivity.this, albumBeanList);
+                    albumAdapter = new AlbumRecylerAdapter(MainActivity.this, albumBeanList);
+                    albumAdapter.setOnItemClickListener(new AlbumRecylerAdapter.OnItemClickListener() {
+                        @Override
+                        public void onClick(int position) {
+                            if (albumBeanList != null && albumBeanList.size() > 0) {
+                                Intent intent = new Intent(MainActivity.this, AlbumDetailActivity.class);
+                                intent.putExtra("id", albumBeanList.get(position).getId());
+                                startActivityForResult(intent, Constants.MAIN_REQUEST_REQUEST);
+                            }
+                        }
+                    });
                     albumGridView.setAdapter(albumAdapter);
                 }
             }
@@ -234,28 +251,31 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
     private void setListener() {
         startSearchBtn.setOnClickListener(this);
         findViewById(R.id.query_all_album_btn).setOnClickListener(this);
-        albumGridView.setOnItemClickListener(new AlbumItemClickListener());
+//        albumGridView.setOnItemClickListener(new AlbumItemClickListener());
         recentStoryGridView.setOnItemClickListener(new RecentStoryItemClickListener());
 
         //设置下拉，上拉监听
         ptrl.setOnPullListener(this);
     }
 
-    private void setAlbumAdapterData() {
-        if (albumAdapter != null) {
-            albumAdapter = new AlbumAdapter(this, albumBeanList);
-            albumGridView.setAdapter(albumAdapter);
-        } else {
-
-        }
-    }
+//    private void setAlbumAdapterData() {
+//        if (albumAdapter != null) {
+//            albumAdapter = new AlbumAdapter(this, albumBeanList);
+//            albumGridView.setAdapter(albumAdapter);
+//        } else {
+//
+//        }
+//    }
 
     private void setAudioAdapterData() {
         if (recentStoryAdapter == null) {
             recentStoryAdapter = new RecentStoryAdapter(MainActivity.this, recentStoryBeanList);
             recentStoryGridView.setAdapter(recentStoryAdapter);
+
             //存储当前列表 用于切换上下条
-            PlayListCache.getInstance(getContext()).setList(recentStoryBeanList);
+            if (isNeedSetHistory) {
+                PlayListCache.getInstance(getContext()).setList(recentStoryBeanList);
+            }
         } else {
             recentStoryAdapter.notifyDataSetChanged();
         }
@@ -315,7 +335,7 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
         switch (id) {
             case R.id.main_search_edit_btn:
                 String keyword = searchEt.getText().toString();
-                SearchPageActivity.openSearchActivity(getContext(), SearchPageActivity.class, keyword);
+                SearchPageActivity.openSearchActivity(getContext(), SearchPageActivity.class, keyword, Constants.MAIN_REQUEST_REQUEST);
                 break;
             case R.id.query_all_album_btn:
                 Intent intent = new Intent(this, AllAlbumActivity.class);

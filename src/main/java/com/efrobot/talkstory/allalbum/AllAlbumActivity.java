@@ -73,6 +73,7 @@ public class AllAlbumActivity extends WithPlayerBaseActivity implements PullToRe
         searchEt = (EditText) findViewById(R.id.main_search_edit);
         startSearchBtn = (TextView) findViewById(R.id.main_search_edit_btn);
 
+        findViewById(R.id.back).setOnClickListener(this);
         refreshView.setOnPullListener(this);
         startSearchBtn.setOnClickListener(this);
     }
@@ -155,6 +156,9 @@ public class AllAlbumActivity extends WithPlayerBaseActivity implements PullToRe
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
+            case R.id.back:
+                finish();
+                break;
             case R.id.main_search_edit_btn:
                 String keyword = searchEt.getText().toString();
                 SearchPageActivity.openSearchActivity(getContext(), SearchPageActivity.class, keyword);

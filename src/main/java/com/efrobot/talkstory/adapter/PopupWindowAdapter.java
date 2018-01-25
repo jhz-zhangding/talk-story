@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.efrobot.talkstory.R;
+import com.efrobot.talkstory.bean.AudiaItemBean;
 import com.efrobot.talkstory.bean.HistoryBean;
 
 import java.util.List;
@@ -20,13 +21,13 @@ public class PopupWindowAdapter extends BaseAdapter {
 
     private Context context;
 
-    private List<HistoryBean> list;
+    private List<AudiaItemBean> list;
 
     private LayoutInflater layoutInflater;
 
     private int id = -1;
 
-    public PopupWindowAdapter(Context context, List<HistoryBean> list, int id) {
+    public PopupWindowAdapter(Context context, List<AudiaItemBean> list, int id) {
         this.context = context;
         this.list = list;
         this.id = id;
@@ -66,7 +67,7 @@ public class PopupWindowAdapter extends BaseAdapter {
             viewHolder = (ViewHolder) view.getTag();
         }
 
-        HistoryBean historyBean = list.get(i);
+        AudiaItemBean historyBean = list.get(i);
         if (historyBean != null) {
             String content = historyBean.getTeacherName() + " - " + historyBean.getName();
             viewHolder.textView.setText(content);

@@ -9,6 +9,7 @@ import com.danikula.videocache.HttpProxyCacheServer;
 import com.efrobot.library.mvp.utils.PreferencesUtils;
 import com.efrobot.talkstory.bean.HistoryBean;
 import com.efrobot.talkstory.db.DbHelper;
+import com.efrobot.talkstory.db.HistoryManager;
 import com.efrobot.talkstory.service.MediaPlayService;
 import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
@@ -22,6 +23,8 @@ import com.nostra13.universalimageloader.core.download.BaseImageDownloader;
 
 import org.xutils.x;
 
+import java.util.List;
+
 /**
  * Created by zd on 2017/12/18.
  */
@@ -29,17 +32,25 @@ public class TalkStoryApplication extends Application {
 
     private final String TAG = TalkStoryApplication.class.getSimpleName();
 
+    //是否开启了音频服务
     public static boolean isStartMediaService = false;
 
     private DbHelper mDbHelper;
 
+    //音频服务
     public MediaPlayService mediaPlayService;
 
+    //http代理
     private HttpProxyCacheServer proxy;
 
+    //当前播放实体类
     public HistoryBean currentPlayBean;
 
+    //是否正在播放
     public boolean isPlayingStory = false;
+
+    //存储播放历史条数最大阀值
+    private final int MAX_HISTORY_NUM = 100;
 
     @Override
     public void onCreate() {
@@ -81,9 +92,10 @@ public class TalkStoryApplication extends Application {
 //        return new HttpProxyCacheServer(this);
 //    }
 
-    public void startMediaService(Context context, String url) {
+    public void startMediaService(Context context, String url, int id) {
         Intent intent = new Intent(context, MediaPlayService.class);
         intent.putExtra("media_url", url);
+        intent.putExtra("media_id", id);
         context.startService(intent);
     }
 
@@ -108,6 +120,16 @@ public class TalkStoryApplication extends Application {
     public void setCurrentPlayBean(HistoryBean currentPlayBean) {
         PreferencesUtils.putInt(this, "lastId", currentPlayBean.getId());
         this.currentPlayBean = currentPlayBean;
+
+        //需要记录历史
+        HistoryManager historyManager = HistoryManager.getInstance(this);
+        List<HistoryBean> list = historyManager.queryAllContent();
+        if (list != null && list.size() >= MAX_HISTORY_NUM) {
+            int id = list.get(0).getId();
+            historyManager.deleteContentById(id);
+        } else {
+            historyManager.insertContent(currentPlayBean);
+        }
     }
 
 

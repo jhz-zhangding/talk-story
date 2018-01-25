@@ -7,16 +7,16 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="15dp"
-        android:layout_marginRight="15dp"
+        android:layout_marginLeft="60dp"
+        android:layout_marginRight="60dp"
         android:layout_marginTop="30dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/competitive_products"
-            android:textColor="@color/black"
-            android:textSize="28sp"
+            android:textColor="@color/album_item_teacher_name_color"
+            android:textSize="30sp"
             android:textStyle="bold" />
 
         <TextView
@@ -24,18 +24,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="30dp"
             android:text="@string/query_all"
             android:textColor="@color/base_text_color"
-            android:textSize="24sp" />
+            android:textSize="15sp" />
     </RelativeLayout>
 
-    <com.efrobot.talkstory.utils.HorizontalListView
+    <android.support.v7.widget.RecyclerView
         android:id="@+id/competitive_products_grid_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"
+        android:layout_marginLeft="60dp"
+        android:layout_marginRight="60dp"
+        android:layout_marginTop="20dp"
         android:gravity="center"
         android:minHeight="330dp"
         />

@@ -71,7 +71,6 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dependency-cache" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/cn.edu.zafu/coreprogress/0.0.3/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/design/23.3.0/jars" />
-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/recyclerview-v7/23.3.0/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.danikula/videocache/2.7.0/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.efrobot.library.mvp/mvplibrary/0.0.15/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.efrobot.library.net/mvpnetlibrary/2.0.6/jars" />
@@ -98,7 +97,6 @@
     <orderEntry type="library" exported="" name="gson-2.8.2" level="project" />
     <orderEntry type="library" exported="" name="ormlite-android-5.0" level="project" />
     <orderEntry type="library" exported="" name="support-core-ui-25.3.1" level="project" />
-    <orderEntry type="library" exported="" name="recyclerview-v7-23.3.0" level="project" />
     <orderEntry type="library" exported="" name="urlconfig-0.0.19" level="project" />
     <orderEntry type="library" exported="" name="videocache-2.7.0" level="project" />
     <orderEntry type="library" exported="" name="xutils-3.4.0" level="project" />
@@ -117,6 +115,7 @@
     <orderEntry type="library" exported="" name="flowlayout-lib-1.1.2" level="project" />
     <orderEntry type="library" exported="" name="mvpnetlibrary-2.0.6" level="project" />
     <orderEntry type="library" exported="" name="coreprogress-0.0.3" level="project" />
+    <orderEntry type="library" exported="" name="recyclerview-v7-25.3.1" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-25.3.1" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-25.3.1" level="project" />
     <orderEntry type="library" exported="" name="support-vector-drawable-25.3.1" level="project" />

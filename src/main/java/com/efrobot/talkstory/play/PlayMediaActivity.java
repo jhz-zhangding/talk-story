@@ -3,7 +3,7 @@ package com.efrobot.talkstory.play;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,11 +17,9 @@ import android.view.animation.LinearInterpolator;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.efrobot.library.mvp.utils.L;
 import com.efrobot.library.mvp.utils.PreferencesUtils;
 import com.efrobot.library.mvp.utils.RobotToastUtil;
@@ -43,7 +41,6 @@ import com.efrobot.talkstory.utils.TimeUtils;
 import com.google.gson.Gson;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.ImageSize;
 import com.zhy.view.flowlayout.FlowLayout;
 import com.zhy.view.flowlayout.TagAdapter;
 import com.zhy.view.flowlayout.TagFlowLayout;
@@ -63,7 +60,7 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
 
     private TextView albumNameTv;
     private TextView nameTv;
-    private ImageView rotateBackgroung, rotateImage;
+    private ImageView rotateImage;
     private TagFlowLayout tagFlowLayout;
 
     //播放器按钮
@@ -82,8 +79,6 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
     private int currentPlayType = -1;
 
     private boolean isAlreadyAdd = false;
-
-    private ImageView parentLayout;
 
     public static void openActivity(Context context, Class cls, AudiaItemBean audiaItemBean, int requestCode) {
         Intent intent = new Intent(context, cls);
@@ -121,11 +116,9 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
         inflater = LayoutInflater.from(this);
         imageLoader = ImageLoader.getInstance();
 
-        parentLayout = (ImageView) findViewById(R.id.play_parent_layout);
 
         albumNameTv = (TextView) findViewById(R.id.album_name);
         nameTv = (TextView) findViewById(R.id.name);
-        rotateBackgroung = (ImageView) findViewById(R.id.rotate_image_background);
         rotateImage = (ImageView) findViewById(R.id.rotate_image);
         tagFlowLayout = (TagFlowLayout) findViewById(R.id.language_flow_layout);
 
@@ -173,13 +166,8 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
             if (!TextUtils.isEmpty(audiaItemBean.getBackgroundImg())) {
 //                ImageSize imageSize = new ImageSize(getScreenWidth(), getScreenHeight());
 //                ImageLoader.getInstance().displayImage(audiaItemBean.getBackgroundImg(), parentLayout, imageSize);
-
-                Glide.with(getContext()).load(audiaItemBean.getBackgroundImg()).into(parentLayout);
-                parentLayout.setAlpha(0.5f);
             }
 
-            if (!TextUtils.isEmpty(audiaItemBean.getRotateImg()))
-                imageLoader.displayImage(audiaItemBean.getRotateImg(), rotateBackgroung);
 
             if (!TextUtils.isEmpty(audiaItemBean.getSmallImg()))
                 imageLoader.displayImage(audiaItemBean.getSmallImg(), rotateImage);
@@ -270,7 +258,6 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
 
                     @Override
                     public void onError(Throwable ex, boolean isOnCallback) {
-
                     }
 
                     @Override
@@ -283,18 +270,14 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
 
                     }
                 }
-
         );
-
     }
-
 
     class MyTagAdapter extends TagAdapter<VersionBean> {
 
         public MyTagAdapter(List<VersionBean> datas) {
             super(datas);
         }
-
 
         @Override
         public View getView(FlowLayout parent, int position, VersionBean o) {
@@ -303,13 +286,62 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
             textView.setText(txt);
 
             if (o.getType() == currentPlayType) {
-                textView.setBackgroundResource(R.drawable.bg_language_selected);
+                setBackgroundColor(o.getType(), textView, true);
             } else {
-                textView.setBackgroundResource(R.drawable.bg_language_unselected);
+                setBackgroundColor(o.getType(), textView, false);
             }
             return textView;
         }
+    }
 
+    //双语
+    private final int DOUBLE_LANGUAGE = 1;
+    //纯英
+    private final int ENGLISH_LANGUAGE = 2;
+    //中文
+    private final int CHINESE_LANGUAGE = 3;
+    //原版
+    private final int SOURCE_LANGUAGE = 4;
+
+    private void setBackgroundColor(int type, TextView textView, boolean isSelected) {
+        switch (type) {
+            case DOUBLE_LANGUAGE:
+                if (isSelected) {
+                    textView.setBackgroundResource(R.drawable.double_language_selected);
+                    textView.setTextColor(Color.WHITE);
+                } else {
+                    textView.setBackgroundResource(R.drawable.double_language_unselected);
+                    textView.setTextColor(Color.parseColor("#FF60C1D6"));
+                }
+                break;
+            case ENGLISH_LANGUAGE:
+                if (isSelected) {
+                    textView.setBackgroundResource(R.drawable.english_language_selected);
+                    textView.setTextColor(Color.WHITE);
+                } else {
+                    textView.setBackgroundResource(R.drawable.english_language_unselected);
+                    textView.setTextColor(Color.parseColor("#FFE98C8C"));
+                }
+                break;
+            case CHINESE_LANGUAGE:
+                if (isSelected) {
+                    textView.setBackgroundResource(R.drawable.chinese_language_selected);
+                    textView.setTextColor(Color.WHITE);
+                } else {
+                    textView.setBackgroundResource(R.drawable.chinese_language_unselected);
+                    textView.setTextColor(Color.parseColor("#FFF5A623"));
+                }
+                break;
+            case SOURCE_LANGUAGE:
+                if (isSelected) {
+                    textView.setBackgroundResource(R.drawable.source_language_selected);
+                    textView.setTextColor(Color.WHITE);
+                } else {
+                    textView.setBackgroundResource(R.drawable.source_language_unselected);
+                    textView.setTextColor(Color.parseColor("#cccccc"));
+                }
+                break;
+        }
     }
 
     //获取第一条播放源
@@ -450,18 +482,18 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
 
     private void showPopupWindowView(View view) {
         id = audiaItemBean.getId();
-        final List<HistoryBean> historyBeanList = HistoryManager.getInstance(getContext()).queryAllContent();
+        final List<AudiaItemBean> audiaItemBeen = PlayListCache.getInstance(this).getList();
         contentView = LayoutInflater.from(this).inflate(R.layout.popup_history_lauout, null);
         popupWindow = new PopupOrderPriceDetail(this, contentView);
         ListView listView = (ListView) contentView.findViewById(R.id.pop_list_view);
-        popupWindowAdapter = new PopupWindowAdapter(this, historyBeanList, id);
+        popupWindowAdapter = new PopupWindowAdapter(this, audiaItemBeen, id);
         listView.setAdapter(popupWindowAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                int audioId = historyBeanList.get(position).getId();
-                int audioType = historyBeanList.get(position).getType();
+                int audioId = audiaItemBeen.get(position).getId();
+                int audioType = audiaItemBeen.get(position).getVersions().get(0).getType();
                 getData(audioId, audioType);
             }
         });
@@ -480,7 +512,7 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
                     application.mediaPlayService.startOtherVideo(versionBean.getAudioUrl());
                 }
             } else {
-                application.startMediaService(this, versionBean.getAudioUrl());
+                application.startMediaService(this, versionBean.getAudioUrl(), audiaItemBean.getId());
             }
             application.isPlayingStory = true;
         }
@@ -498,7 +530,7 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
             } else {
                 if (versionBean != null) {
                     application.isPlayingStory = true;
-                    application.startMediaService(this, versionBean.getAudioUrl());
+                    application.startMediaService(this, versionBean.getAudioUrl(), audiaItemBean.getId());
                     startUpdateSeekBar();
                 }
             }

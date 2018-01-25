@@ -6,48 +6,51 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/album_base_color"
-        android:minHeight="250dp"
+        android:layout_height="300dp"
         android:layout_marginBottom="20dp"
-        >
+        android:background="@color/album_detail_color">
+
 
         <TextView
             android:id="@+id/album_back_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
             android:layout_marginLeft="30dp"
             android:layout_marginRight="30dp"
             android:layout_marginTop="20dp"
-            android:text="返回"
-            android:textColor="@color/black"
-            android:textSize="28sp" />
+            android:background="@mipmap/base_back_image" />
 
-        <ImageView
-            android:id="@+id/detail_image"
-            android:layout_width="170dp"
-            android:layout_height="170dp"
+        <FrameLayout
+            android:id="@+id/detail_image_fl"
+            android:layout_width="198dp"
+            android:layout_height="198dp"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="80dp"
-            android:background="#D7D7D7" />
+            android:layout_marginLeft="210dp"
+            android:background="@drawable/detail_image_border">
+
+            <ImageView
+                android:id="@+id/detail_image"
+                android:layout_width="188dp"
+                android:layout_height="188dp"
+                android:layout_gravity="center" />
+        </FrameLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignTop="@+id/detail_image"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="50dp"
-            android:layout_toRightOf="@+id/detail_image"
+            android:layout_alignTop="@+id/detail_image_fl"
+            android:layout_marginLeft="60dp"
+            android:layout_toRightOf="@+id/detail_image_fl"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/audio_detail_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="44dp"
                 android:text="哈利波特血魔法英语第一季Season 1"
-                android:textColor="@color/base_text_color"
-                android:textSize="18sp" />
+                android:textColor="@color/white"
+                android:textSize="30sp" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -60,8 +63,7 @@
                     android:id="@+id/item_teach_image"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:src="@mipmap/default_image"
-                    />
+                    android:src="@mipmap/default_image" />
 
                 <TextView
                     android:id="@+id/audio_detail_author_name"
@@ -69,19 +71,21 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:text="CoCo姐姐"
-                    android:textColor="@color/base_text_color"
-                    android:textSize="18sp" />
+                    android:textColor="@color/white"
+                    android:textSize="22.5sp" />
+
+                <TextView
+                    android:id="@+id/audio_detail_list_num"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="50dp"
+                    android:text="26个故事"
+                    android:textColor="@color/white"
+                    android:textSize="22.5sp" />
 
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/audio_detail_list_num"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="26个故事"
-                android:textColor="@color/base_text_color"
-                android:textSize="18sp" />
+
         </LinearLayout>
     </RelativeLayout>
 

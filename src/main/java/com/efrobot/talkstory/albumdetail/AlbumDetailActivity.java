@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.efrobot.library.mvp.utils.L;
 import com.efrobot.talkstory.R;
 import com.efrobot.talkstory.base.WithPlayerBaseActivity;
@@ -15,6 +16,7 @@ import com.efrobot.talkstory.bean.AlbumDetail;
 import com.efrobot.talkstory.bean.AlbumItemBean;
 import com.efrobot.talkstory.bean.AudiaItemBean;
 import com.efrobot.talkstory.bean.AudioDetailBean;
+import com.efrobot.talkstory.db.HistoryManager;
 import com.efrobot.talkstory.env.Constants;
 import com.efrobot.talkstory.env.PlayListCache;
 import com.efrobot.talkstory.http.HttpParamUtils;
@@ -104,6 +106,9 @@ public class AlbumDetailActivity extends WithPlayerBaseActivity implements View.
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             if (i != 0) {
+                //专辑页面点击播放后重新生成播放列表
+                PlayListCache.getInstance(getContext()).setList(list);
+
                 AudiaItemBean audiaItemBean = list.get(i - 1);
                 PlayMediaActivity.openActivity(getContext(), PlayMediaActivity.class, audiaItemBean, Constants.MAIN_REQUEST_REQUEST);
             }
@@ -115,8 +120,7 @@ public class AlbumDetailActivity extends WithPlayerBaseActivity implements View.
         AlbumItemBean album = albumDetail.getData();
         if (album != null) {
             if (!TextUtils.isEmpty(album.getImage())) {
-                ImageAware imageAware = new ImageViewAware(detailImage, false);
-                ImageLoader.getInstance().displayImage(album.getImage(), imageAware, OptionsUtils.getInstance().getCircelOption());
+                Glide.with(this).load(album.getImage()).apply(OptionsUtils.getInstance().getRoundGlideOption(12)).into(detailImage);
             }
             title.setText(album.getName());
 
@@ -135,7 +139,6 @@ public class AlbumDetailActivity extends WithPlayerBaseActivity implements View.
         } else {
             detailListAdapter.notifyDataSetChanged();
         }
-        PlayListCache.getInstance(getContext()).setList(list);
     }
 
     private void getHttpData() {

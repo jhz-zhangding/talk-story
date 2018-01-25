@@ -58,12 +58,14 @@ import java.util.Map;
 
 public abstract class WithPlayerBaseActivity extends Activity {
 
+    private final String TAG = WithPlayerBaseActivity.class.getSimpleName();
+
     public TalkStoryApplication application;
 
     private PopupOrderPriceDetail popupWindow;
     private PopupOrderPriceDetail volumePopupWindow;
     private PopupWindowAdapter popupWindowAdapter;
-    public List<HistoryBean> historyBeanList;
+    public List<AudiaItemBean> audiaItemBeanList;
 
     private ImageView playImage;
     private ImageView playLastImg, playStartOrPauseImg, playNextImg;
@@ -95,8 +97,6 @@ public abstract class WithPlayerBaseActivity extends Activity {
         application = TalkStoryApplication.from(this);
 
         audiomanage = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-
-        historyBeanList = HistoryManager.getInstance(this).queryAllContent();
 
         FrameLayout view = (FrameLayout) findViewById(R.id.frame_layout);
         View childView = LayoutInflater.from(this).inflate(getZdContentView(), view, false);
@@ -132,14 +132,14 @@ public abstract class WithPlayerBaseActivity extends Activity {
         findViewById(R.id.play_framelayout).setOnClickListener(onClick);
     }
 
-    private void startPlay(String url) {
+    private void startPlay(String url, int id) {
         if (application != null) {
             if (application.mediaPlayService != null && application.mediaPlayService.mediaPlayer != null) {
                 if (!TextUtils.isEmpty(url)) {
                     application.mediaPlayService.startOtherVideo(url);
                 }
             } else {
-                application.startMediaService(this, url);
+                application.startMediaService(this, url, id);
             }
             application.isPlayingStory = true;
         }
@@ -158,7 +158,7 @@ public abstract class WithPlayerBaseActivity extends Activity {
                             if (audiaItemBean.getVersions().size() > 0) {
                                 /** 默认播放第一条 **/
                                 VersionBean versionBean = audiaItemBean.getVersions().get(0);
-                                startPlay(versionBean.getAudioUrl());
+                                startPlay(versionBean.getAudioUrl(), audiaItemBean.getId());
                                 application.setCurrentPlayBean(gerateHistoryData(audiaItemBean, versionBean));
                             }
                         }
@@ -174,7 +174,7 @@ public abstract class WithPlayerBaseActivity extends Activity {
                             if (audiaItemBean.getVersions().size() > 0) {
                                 /** 默认播放第一条 **/
                                 VersionBean versionBean = audiaItemBean.getVersions().get(0);
-                                startPlay(versionBean.getAudioUrl());
+                                startPlay(versionBean.getAudioUrl(), audiaItemBean.getId());
                                 application.setCurrentPlayBean(gerateHistoryData(audiaItemBean, versionBean));
                             }
                         }
@@ -193,8 +193,9 @@ public abstract class WithPlayerBaseActivity extends Activity {
                     } else {
                         if (application.getCurrentPlayBean() != null) {
                             String mMediaUrl = application.getCurrentPlayBean().getAudioUrl();
+                            int mMediaId = application.getCurrentPlayBean().getId();
                             application.isPlayingStory = true;
-                            application.startMediaService(getContext(), mMediaUrl);
+                            application.startMediaService(getContext(), mMediaUrl, mMediaId);
                         }
                     }
                     updatePlayerView();
@@ -302,17 +303,20 @@ public abstract class WithPlayerBaseActivity extends Activity {
         if (application.getCurrentPlayBean() != null) {
             id = application.getCurrentPlayBean().getId();
         }
+
+        audiaItemBeanList = PlayListCache.getInstance(this).getList();
+
         contentView = LayoutInflater.from(this).inflate(R.layout.popup_history_lauout, null);
         popupWindow = new PopupOrderPriceDetail(this, contentView);
         ListView listView = (ListView) contentView.findViewById(R.id.pop_list_view);
-        popupWindowAdapter = new PopupWindowAdapter(this, historyBeanList, id);
+        popupWindowAdapter = new PopupWindowAdapter(this, audiaItemBeanList, id);
         listView.setAdapter(popupWindowAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                int audioId = historyBeanList.get(position).getId();
-                int audioType = historyBeanList.get(position).getType();
+                int audioId = audiaItemBeanList.get(position).getId();
+                int audioType = audiaItemBeanList.get(position).getVersions().get(0).getType();
                 getData(audioId, audioType);
             }
         });
@@ -404,7 +408,7 @@ public abstract class WithPlayerBaseActivity extends Activity {
     public void updatePlayerView() {
         if (application.getCurrentPlayBean() != null) {
             playNameTv.setText(application.getCurrentPlayBean().getName());
-            totalPlayTimeTv.setText(" / " + TimeUtils.ShowMusicTime(application.currentPlayBean.getPlayTime()));
+            totalPlayTimeTv.setText(" / " + TimeUtils.ShowMusicTime(application.getCurrentPlayBean().getPlayTime()));
             progressBar.setMax(application.currentPlayBean.getPlayTime());
             if (!TextUtils.isEmpty(application.getCurrentPlayBean().getSmallImg()))
                 ImageLoader.getInstance().displayImage(application.getCurrentPlayBean().getSmallImg(), playImage);
@@ -530,7 +534,7 @@ public abstract class WithPlayerBaseActivity extends Activity {
         }
     }
 
-    private HistoryBean gerateHistoryData(AudiaItemBean audiaItemBean, VersionBean versionBean) {
+    public HistoryBean gerateHistoryData(AudiaItemBean audiaItemBean, VersionBean versionBean) {
         HistoryBean historyBean = new HistoryBean();
         if (audiaItemBean != null && versionBean != null) {
             historyBean.setId(audiaItemBean.getId());
@@ -556,6 +560,7 @@ public abstract class WithPlayerBaseActivity extends Activity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
+            L.e(TAG, "接收到广播：" + action);
             if (action.equals(Constants.ACTION_NAME)) {
                 updatePlayerView();
             }

@@ -11,6 +11,7 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.danikula.videocache.CacheListener;
 import com.danikula.videocache.HttpProxyCacheServer;
@@ -190,12 +191,16 @@ public class MediaPlayService extends Service implements CacheListener {
                     }
                 }
                 if (audiaItemBean != null && versionBean != null) {
+                    L.e(TAG, "发送广播:更新播放下一条");
+                    application.setCurrentPlayBean(gerateHistoryData(audiaItemBean, versionBean));
                     Intent mIntent = new Intent(Constants.ACTION_NAME);
                     //发送广播
                     sendBroadcast(mIntent);
                 }
                 startVideo();
             }
+        } else {
+            Toast.makeText(this, "播放列表为空", Toast.LENGTH_SHORT).show();
         }
     }
 

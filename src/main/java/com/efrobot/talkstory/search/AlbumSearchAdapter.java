@@ -9,6 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.efrobot.talkstory.R;
 import com.efrobot.talkstory.bean.AlbumItemBean;
 import com.efrobot.talkstory.utils.OptionsUtils;
@@ -80,8 +81,7 @@ public class AlbumSearchAdapter extends BaseAdapter {
 
         AlbumItemBean data = list.get(i);
         if (!TextUtils.isEmpty(data.getImage())) {
-            ImageAware imageAware = new ImageViewAware(viewHolder.albumImage, false);
-            imageLoader.displayImage(data.getImage(), imageAware);
+            Glide.with(context).load(data.getImage()).apply(OptionsUtils.getInstance().getRoundGlideOption(12)).into(viewHolder.albumImage);
         }
 
         viewHolder.albumTitle.setText(data.getName());

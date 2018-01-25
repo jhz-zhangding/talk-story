@@ -1,43 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="100dp"
+    android:layout_height="85dp"
     android:background="#00000000">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="60dp"
         android:layout_alignParentBottom="true"
-        android:background="@color/player_bg"
+        android:background="@color/white"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/play_last_btn"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_marginLeft="150dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginLeft="185dp"
             android:background="@mipmap/player_last" />
 
         <ImageView
             android:id="@+id/base_play_pause_and_play"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_marginLeft="40dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginLeft="25dp"
             android:background="@mipmap/player_start" />
 
         <ImageView
             android:id="@+id/play_next_btn"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_marginLeft="40dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginLeft="25dp"
             android:background="@mipmap/player_next" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/player_seek_bar_width"
             android:layout_height="match_parent"
             android:layout_marginLeft="30dp"
-            android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -51,16 +50,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:maxLines="1"
                     android:text=""
-                    android:textColor="@color/white"
-                    android:textSize="22sp" />
+                    android:textColor="@color/album_item_teacher_name_color"
+                    android:textSize="15sp" />
 
                 <TextView
                     android:id="@+id/play_music_current_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="00:00"
-                    android:textColor="#00ff00"
+                    android:textColor="@color/album_item_teacher_name_color"
                     android:textSize="18sp" />
 
                 <TextView
@@ -68,18 +68,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text=" / 00:00"
-                    android:textColor="@color/white"
+                    android:textColor="@color/album_item_teacher_name_color"
                     android:textSize="18sp" />
-
-
             </LinearLayout>
 
             <ProgressBar
                 android:id="@+id/myProgressBar"
                 style="@style/m_progress_bar_style"
                 android:layout_width="match_parent"
-                android:layout_height="3dp"
-                android:layout_marginTop="12dp"
+                android:layout_height="6dp"
+                android:layout_marginTop="5dp"
                 android:max="100"
                 android:maxHeight="5dp"
                 android:minHeight="2dp"
@@ -90,14 +88,14 @@
             android:id="@+id/play_mode"
             android:layout_width="35dp"
             android:layout_height="35dp"
-            android:layout_marginLeft="50dp"
+            android:layout_marginLeft="106dp"
             android:background="@mipmap/player_order" />
 
         <ImageView
             android:id="@+id/play_history"
             android:layout_width="35dp"
             android:layout_height="35dp"
-            android:layout_marginLeft="20dp"
+            android:layout_marginLeft="60dp"
             android:background="@mipmap/player_recent_list" />
 
         <ImageView
@@ -106,14 +104,15 @@
             android:layout_height="35dp"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
-            android:background="@mipmap/player_volum" />
+            android:background="@mipmap/player_volum"
+            android:visibility="gone" />
     </LinearLayout>
 
     <co.songlcy.circleimage.view.CircleImage
         android:id="@+id/play_image"
-        android:layout_width="90dp"
-        android:layout_height="90dp"
-        android:layout_marginLeft="30dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginLeft="80dp"
         android:src="@mipmap/play_load" />
 
 

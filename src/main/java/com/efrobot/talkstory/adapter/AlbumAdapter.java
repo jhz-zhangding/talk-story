@@ -15,6 +15,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.efrobot.talkstory.R;
 import com.efrobot.talkstory.bean.AlbumBean;
 import com.efrobot.talkstory.bean.AlbumItemBean;
+import com.efrobot.talkstory.utils.GlideRoundTransform;
 import com.efrobot.talkstory.utils.OptionsUtils;
 import com.efrobot.talkstory.utils.xUtilsImageUtils;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -89,7 +90,7 @@ public class AlbumAdapter extends BaseAdapter {
 
         AlbumItemBean data = list.get(i);
         if (!TextUtils.isEmpty(data.getImage())) {
-            Glide.with(context).load(data.getImage()).apply(OptionsUtils.getInstance().getGlideOption()).into(viewHolder.albumImage);
+            Glide.with(context).load(data.getImage()).apply(OptionsUtils.getInstance().getRoundGlideOption(12)).into(viewHolder.albumImage);
 
 //            ImageAware imageAware = new ImageViewAware(viewHolder.albumImage, false);
 //            imageLoader.displayImage(data.getImage(), imageAware);

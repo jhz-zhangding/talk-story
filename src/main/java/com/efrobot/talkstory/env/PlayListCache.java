@@ -1,12 +1,17 @@
 package com.efrobot.talkstory.env;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.efrobot.library.mvp.utils.L;
+import com.efrobot.talkstory.bean.AudiaBean;
 import com.efrobot.talkstory.bean.AudiaItemBean;
 import com.efrobot.talkstory.bean.HistoryBean;
 import com.efrobot.talkstory.bean.VersionBean;
 import com.efrobot.talkstory.db.HistoryManager;
+import com.efrobot.talkstory.utils.PreferencesUtils;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,18 +47,35 @@ public class PlayListCache {
         }
         PlayListCache.list.addAll(list);
 
-        insertData();
-
+        //当前播放列表保存到手机内存当中
+        setList(new Gson().toJson(list));
     }
 
-    private void insertData() {
-        HistoryManager.getInstance(mContext).delete();
-        for (int i = 0; i < PlayListCache.list.size(); i++) {
-            HistoryBean historyBean = gerateHistoryData(PlayListCache.list.get(i));
-            if (historyBean != null) {
-                HistoryManager.getInstance(mContext).insertContent(historyBean);
+    /**
+     * 将播放列表保存到手机内存
+     *
+     * @param dataJsonStr
+     */
+    public void setList(String dataJsonStr) {
+        PreferencesUtils.putString(mContext, Constants.MUSIC_LIST_DATA_CACHE, dataJsonStr);
+    }
+
+    public List<AudiaItemBean> getList() {
+        List<AudiaItemBean> list = new ArrayList<>();
+        if (PlayListCache.list != null && PlayListCache.list.size() > 0) {
+            list.addAll(PlayListCache.list);
+        } else {
+
+            String data = PreferencesUtils.getString(mContext, Constants.MUSIC_LIST_DATA_CACHE);
+            if (!TextUtils.isEmpty(data)) {
+                List<AudiaItemBean> datalist = new Gson().fromJson(data, new TypeToken<List<AudiaItemBean>>() {
+                }.getType());
+                if (datalist != null && datalist.size() > 0) {
+                    list = datalist;
+                }
             }
         }
+        return list;
     }
 
     private HistoryBean gerateHistoryData(AudiaItemBean audiaItemBean) {

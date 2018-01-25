@@ -6,4 +6,11 @@
     <dimen name="header_height">60dp</dimen>
     <dimen name="footer_height">90dp</dimen>
     <dimen name="footer_padding">10dp</dimen>
+
+    <dimen name="search_window_height">80dp</dimen>
+    <dimen name="search_edit_height">46.9dp</dimen>
+
+    <dimen name="album_img_size">188dp</dimen>
+    <dimen name="album_name_height">56dp</dimen>
+    <dimen name="player_seek_bar_width">595dp</dimen>
 </resources>
