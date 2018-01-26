@@ -4,7 +4,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -122,6 +121,7 @@ public class MediaPlayService extends Service implements CacheListener {
     MediaPlayer.OnCompletionListener onCompletionListener = new MediaPlayer.OnCompletionListener() {
         @Override
         public void onCompletion(MediaPlayer mediaPlayer) {
+            L.e(TAG, "播放結束，開始播放下一條");
             startPlayNext();
         }
     };
@@ -132,13 +132,14 @@ public class MediaPlayService extends Service implements CacheListener {
 
     private void startPlayNext() {
         boolean isContains = false;
-        if (PlayListCache.list != null) {
+        List<AudiaItemBean> list = PlayListCache.getInstance(this).getList();
+        if (list != null) {
             int nextAudioIndex = 0;
-            for (int i = 0; i < PlayListCache.list.size(); i++) {
-                int id = PlayListCache.list.get(i).getId();
+            for (int i = 0; i < list.size(); i++) {
+                int id = list.get(i).getId();
                 if (id == VIDEO_ID) {
-                    audiaItemBean = PlayListCache.list.get(i);
-                    versionBeen = PlayListCache.list.get(i).getVersions();
+                    audiaItemBean = list.get(i);
+                    versionBeen = audiaItemBean.getVersions();
                     nextAudioIndex = i;
                     isContains = true;
                     break;
@@ -146,8 +147,8 @@ public class MediaPlayService extends Service implements CacheListener {
             }
 
             if (!isContains) {
-                if (PlayListCache.list.size() > 0) {
-                    versionBeen = PlayListCache.list.get(0).getVersions();
+                if (list.size() > 0) {
+                    versionBeen = list.get(0).getVersions();
                 }
             }
 
@@ -161,38 +162,43 @@ public class MediaPlayService extends Service implements CacheListener {
                     }
                 }
                 if (nextVersionIndex < versionBeen.size()) {
+                    L.e(TAG, "list.size() = " + list.size() + "播放下一个版本----nextVersionIndex = " + nextVersionIndex);
                     //对于多版本故事，默认先播放第一版本，再播放第二版本
                     versionBean = versionBeen.get(nextVersionIndex);
                     VIDEO_URL = versionBeen.get(nextVersionIndex).getAudioUrl();
+                    VIDEO_ID = audiaItemBean.getId();
                 } else {
                     //版本都播完，开始播放下一个故事
                     switch (currentPlayMode) {
                         case Constants.ORDER_PLAY_MODE:
-                            nextAudioIndex = nextVersionIndex + 1;
-                            if (nextAudioIndex >= PlayListCache.list.size()) {
+                            nextAudioIndex = nextAudioIndex + 1;
+                            if (nextAudioIndex >= list.size()) {
                                 nextAudioIndex = 0;
                             }
                             break;
                         case Constants.RANDOM_PLAY_MODE:
-                            nextAudioIndex = new Random().nextInt(PlayListCache.list.size());
+                            nextAudioIndex = new Random().nextInt(list.size());
                             break;
                         case Constants.CIRCEL_PLAY_MODE:
 
                             break;
                     }
 
-                    L.e("", "PlayListCache.list.size() = " + PlayListCache.list.size() + "----nextAudioIndex = " + nextAudioIndex);
-                    if (nextAudioIndex < PlayListCache.list.size()) {
-                        versionBeen = PlayListCache.list.get(nextAudioIndex).getVersions();
+                    L.e(TAG, "list.size() = " + list.size() + "----nextAudioIndex = " + nextAudioIndex);
+                    L.e(TAG, "name = " + list.get(nextAudioIndex).getName());
+                    if (nextAudioIndex < list.size()) {
+                        audiaItemBean = list.get(nextAudioIndex);
+                        versionBeen = audiaItemBean.getVersions();
                         if (versionBeen != null && versionBeen.size() > 0) {
-                            versionBean = PlayListCache.list.get(nextAudioIndex).getVersions().get(0);
+                            versionBean = list.get(nextAudioIndex).getVersions().get(0);
                             VIDEO_URL = versionBean.getAudioUrl();
+                            VIDEO_ID = list.get(nextAudioIndex).getId();
                         }
                     }
                 }
                 if (audiaItemBean != null && versionBean != null) {
                     L.e(TAG, "发送广播:更新播放下一条");
-                    application.setCurrentPlayBean(gerateHistoryData(audiaItemBean, versionBean));
+                    application.setCurrentPlayBean(audiaItemBean, versionBean);
                     Intent mIntent = new Intent(Constants.ACTION_NAME);
                     //发送广播
                     sendBroadcast(mIntent);
@@ -254,22 +260,6 @@ public class MediaPlayService extends Service implements CacheListener {
 //            progressBar.setSecondaryProgress(100);
         }
     }
-
-    private HistoryBean gerateHistoryData(AudiaItemBean audiaItemBean, VersionBean versionBean) {
-        HistoryBean historyBean = new HistoryBean();
-        if (audiaItemBean != null && versionBean != null) {
-            historyBean.setId(audiaItemBean.getId());
-            historyBean.setName(audiaItemBean.getName());
-            historyBean.setTeacherName(audiaItemBean.getTeacherName());
-            historyBean.setSmallImg(audiaItemBean.getSmallImg());
-            historyBean.setAudioPath(versionBean.getAudioPath());
-            historyBean.setAudioUrl(versionBean.getAudioUrl());
-            historyBean.setPlayTime(versionBean.getPlayTime());
-            historyBean.setType(versionBean.getType());
-        }
-        return historyBean;
-    }
-
 
     private final class VideoProgressUpdater extends Handler {
 

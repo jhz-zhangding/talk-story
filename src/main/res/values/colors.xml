@@ -11,6 +11,7 @@
     <color name="album_item_teacher_name_color">#FF333333</color>
     <color name="album_item_image_bg_color">#FFD8D8D8</color>
     <color name="text_ff999999">#FF999999</color>
+    <color name="text_ff666666">#FF666666</color>
     <color name="tag_list_item_bg">#FFF0F0F0</color>
 
     <color name="colorPrimary">#3F51B5</color>

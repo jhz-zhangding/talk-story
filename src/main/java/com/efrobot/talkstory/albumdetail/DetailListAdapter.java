@@ -140,8 +140,8 @@ public class DetailListAdapter extends BaseAdapter {
             textView.setText(txt);
 
             if (application.getCurrentPlayBean() != null) {
-                if (!TextUtils.isEmpty(application.getCurrentPlayBean().getAudioUrl())) {
-                    if (o.getAudioUrl().equals(application.getCurrentPlayBean().getAudioUrl())) {
+                if (!TextUtils.isEmpty(application.getCurrentPlayBean().getVersionBean().getAudioUrl())) {
+                    if (o.getAudioUrl().equals(application.getCurrentPlayBean().getVersionBean().getAudioUrl())) {
                         setBackgroundColor(o.getType(), textView, true);
                     } else {
                         setBackgroundColor(o.getType(), textView, false);

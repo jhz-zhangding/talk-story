@@ -17,6 +17,7 @@ import com.efrobot.talkstory.TalkStoryApplication;
 import com.efrobot.talkstory.bean.AudiaItemBean;
 import com.efrobot.talkstory.bean.VersionBean;
 import com.efrobot.talkstory.env.Constants;
+import com.efrobot.talkstory.env.PlayListCache;
 import com.efrobot.talkstory.play.PlayMediaActivity;
 import com.efrobot.talkstory.utils.OptionsUtils;
 import com.efrobot.talkstory.utils.TimeUtils;
@@ -124,6 +125,8 @@ public class RecentStoryAdapter extends BaseAdapter {
                 if (myTagAdapter != null) {
                     myTagAdapter.notifyDataChanged();
                 }
+                //存储播放列表
+                PlayListCache.getInstance(context).setList(list);
                 PlayMediaActivity.openActivity(context, PlayMediaActivity.class, data, type, Constants.MAIN_REQUEST_REQUEST);
                 return false;
             }
@@ -155,8 +158,8 @@ public class RecentStoryAdapter extends BaseAdapter {
             textView.setText(txt);
 
             if (application.getCurrentPlayBean() != null) {
-                if (!TextUtils.isEmpty(application.getCurrentPlayBean().getAudioUrl())) {
-                    if (o.getAudioUrl().equals(application.getCurrentPlayBean().getAudioUrl())) {
+                if (!TextUtils.isEmpty(application.getCurrentPlayBean().getVersionBean().getAudioUrl())) {
+                    if (o.getAudioUrl().equals(application.getCurrentPlayBean().getVersionBean().getAudioUrl())) {
                         setBackgroundColor(o.getType(), textView, true);
                     } else {
                         setBackgroundColor(o.getType(), textView, false);

@@ -7,7 +7,10 @@ import android.graphics.Bitmap;
 
 import com.danikula.videocache.HttpProxyCacheServer;
 import com.efrobot.library.mvp.utils.PreferencesUtils;
+import com.efrobot.talkstory.bean.AudiaItemBean;
+import com.efrobot.talkstory.bean.CurrentPlayBean;
 import com.efrobot.talkstory.bean.HistoryBean;
+import com.efrobot.talkstory.bean.VersionBean;
 import com.efrobot.talkstory.db.DbHelper;
 import com.efrobot.talkstory.db.HistoryManager;
 import com.efrobot.talkstory.service.MediaPlayService;
@@ -44,7 +47,7 @@ public class TalkStoryApplication extends Application {
     private HttpProxyCacheServer proxy;
 
     //当前播放实体类
-    public HistoryBean currentPlayBean;
+    public CurrentPlayBean currentPlayBean;
 
     //是否正在播放
     public boolean isPlayingStory = false;
@@ -113,25 +116,56 @@ public class TalkStoryApplication extends Application {
         isStartMediaService = true;
     }
 
-    public HistoryBean getCurrentPlayBean() {
+    public CurrentPlayBean getCurrentPlayBean() {
         return currentPlayBean;
     }
 
-    public void setCurrentPlayBean(HistoryBean currentPlayBean) {
-        PreferencesUtils.putInt(this, "lastId", currentPlayBean.getId());
+    public void setCurrentPlayBean(CurrentPlayBean currentPlayBean) {
+        PreferencesUtils.putInt(this, "lastId", currentPlayBean.getAudiaItemBean().getId());
         this.currentPlayBean = currentPlayBean;
-
-        //需要记录历史
-        HistoryManager historyManager = HistoryManager.getInstance(this);
-        List<HistoryBean> list = historyManager.queryAllContent();
-        if (list != null && list.size() >= MAX_HISTORY_NUM) {
-            int id = list.get(0).getId();
-            historyManager.deleteContentById(id);
-        } else {
-            historyManager.insertContent(currentPlayBean);
-        }
     }
 
+    public void setCurrentPlayBean(AudiaItemBean audiaItemBean, int type) {
+        CurrentPlayBean currentPlayBean = new CurrentPlayBean();
+
+        List<VersionBean> versionBeanList = audiaItemBean.getVersions();
+        if (type == -1 && versionBeanList != null && versionBeanList.size() > 0) {
+            currentPlayBean.setAudiaItemBean(audiaItemBean);
+            currentPlayBean.setVersionBean(versionBeanList.get(0));
+        } else {
+            for (int j = 0; j < versionBeanList.size(); j++) {
+                if (type == versionBeanList.get(j).getType()) {
+                    currentPlayBean.setAudiaItemBean(audiaItemBean);
+                    currentPlayBean.setVersionBean(versionBeanList.get(j));
+                    break;
+                }
+            }
+        }
+        PreferencesUtils.putInt(this, "lastId", currentPlayBean.getAudiaItemBean().getId());
+        this.currentPlayBean = currentPlayBean;
+    }
+
+    public void setCurrentPlayBean(AudiaItemBean audiaItemBean, VersionBean versionBean) {
+        CurrentPlayBean mCurrentPlayBean = new CurrentPlayBean();
+        mCurrentPlayBean.setAudiaItemBean(audiaItemBean);
+        mCurrentPlayBean.setVersionBean(versionBean);
+        this.currentPlayBean = mCurrentPlayBean;
+    }
+
+//    public VersionBean getVersionBean(int type) {
+//        VersionBean versionBean = null;
+//        if (getCurrentPlayBean() != null) {
+//            List<VersionBean> versionBeanList = getCurrentPlayBean().getVersions();
+//            for (int i = 0; i < versionBeanList.size(); i++) {
+//                int verType = versionBeanList.get(i).getType();
+//                if (type == verType) {
+//                    versionBean = versionBeanList.get(i);
+//                    break;
+//                }
+//            }
+//        }
+//        return versionBean;
+//    }
 
     public static void initImageLoader(Context context) {
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context)

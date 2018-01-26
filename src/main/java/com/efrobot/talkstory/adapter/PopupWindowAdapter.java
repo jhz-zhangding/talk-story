@@ -69,13 +69,16 @@ public class PopupWindowAdapter extends BaseAdapter {
 
         AudiaItemBean historyBean = list.get(i);
         if (historyBean != null) {
-            String content = historyBean.getTeacherName() + " - " + historyBean.getName();
+            String content = historyBean.getTeacherName() + "  -  " + historyBean.getName();
             viewHolder.textView.setText(content);
 
             if (id == historyBean.getId()) {
+                viewHolder.textView.setTextColor(context.getResources().getColor(R.color.album_detail_color));
                 viewHolder.imageView.setVisibility(View.VISIBLE);
-            } else
+            } else {
+                viewHolder.textView.setTextColor(context.getResources().getColor(R.color.text_ff666666));
                 viewHolder.imageView.setVisibility(View.INVISIBLE);
+            }
         }
 
         return view;

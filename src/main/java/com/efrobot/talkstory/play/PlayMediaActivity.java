@@ -1,14 +1,18 @@
 package com.efrobot.talkstory.play;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.widget.DrawerLayout;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
@@ -29,14 +33,11 @@ import com.efrobot.talkstory.adapter.PopupWindowAdapter;
 import com.efrobot.talkstory.base.BaseActivity;
 import com.efrobot.talkstory.bean.AudiaItemBean;
 import com.efrobot.talkstory.bean.AudioDetail;
-import com.efrobot.talkstory.bean.HistoryBean;
 import com.efrobot.talkstory.bean.VersionBean;
-import com.efrobot.talkstory.db.HistoryManager;
 import com.efrobot.talkstory.env.Constants;
 import com.efrobot.talkstory.env.PlayListCache;
 import com.efrobot.talkstory.http.HttpParamUtils;
 import com.efrobot.talkstory.http.HttpUtils;
-import com.efrobot.talkstory.utils.PopupOrderPriceDetail;
 import com.efrobot.talkstory.utils.TimeUtils;
 import com.google.gson.Gson;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -51,6 +52,8 @@ import java.util.List;
 import java.util.Map;
 
 public class PlayMediaActivity extends BaseActivity implements View.OnClickListener {
+
+    private DrawerLayout drawerLayout;
 
     private LayoutInflater inflater;
     private AudiaItemBean audiaItemBean;
@@ -101,9 +104,10 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
         initView();
         initListener();
 
-        application.setCurrentPlayBean(gerateHistoryData());
+        application.setCurrentPlayBean(audiaItemBean, versionBean);
 //        addHistoryToDatabase();
         updatePlayModeImage();
+        registerBoradcastReceiver();
     }
 
     protected void initView() {
@@ -116,6 +120,8 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
         inflater = LayoutInflater.from(this);
         imageLoader = ImageLoader.getInstance();
 
+        drawerLayout = (DrawerLayout) findViewById(R.id.v4_drawer_layout);
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
         albumNameTv = (TextView) findViewById(R.id.album_name);
         nameTv = (TextView) findViewById(R.id.name);
@@ -134,6 +140,16 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
         mSeekBar.setOnSeekBarChangeListener(new MySeekBarChangeListener());
 
         initData();
+        initDrawerListData();
+    }
+
+    private void showDrawerLayout() {
+
+        if (!drawerLayout.isDrawerOpen(Gravity.RIGHT)) {
+            drawerLayout.openDrawer(Gravity.RIGHT);
+        } else {
+            drawerLayout.closeDrawer(Gravity.RIGHT);
+        }
     }
 
     class MySeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
@@ -179,9 +195,9 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
 
             //判断页面的播放内容是否和后台播放的一致
             if (application.getCurrentPlayBean() != null) {
-                int id = application.getCurrentPlayBean().getId();
+                int id = application.getCurrentPlayBean().getAudiaItemBean().getId();
                 if (id == audiaItemBean.getId()) { //进入的是当前播放页
-                    int playerType = application.getCurrentPlayBean().getType();
+                    int playerType = application.getCurrentPlayBean().getVersionBean().getType();
                     if (currentPlayType == -1 || currentPlayType == playerType) { //同类型就不重新播了
                         if (application.mediaPlayService != null && application.mediaPlayService.mediaPlayer != null) {
                             if (!application.mediaPlayService.mediaPlayer.isPlaying()) {
@@ -217,6 +233,26 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
 
     }
 
+    private void playCompletionUpdate() {
+        if (audiaItemBean != null) {
+            albumNameTv.setText(audiaItemBean.getAlbumName());
+            nameTv.setText(audiaItemBean.getName());
+
+            if (!TextUtils.isEmpty(audiaItemBean.getSmallImg()))
+                imageLoader.displayImage(audiaItemBean.getSmallImg(), rotateImage);
+
+            if (versionBean != null) {
+                int currentTotalTime = versionBean.getPlayTime();
+                totalTimeTv.setText(TimeUtils.ShowMusicTime(currentTotalTime));
+                mSeekBar.setMax(currentTotalTime);
+            }
+
+            myTagAdapter = new MyTagAdapter(audiaItemBean.getVersions());
+            tagFlowLayout.setAdapter(myTagAdapter);
+            tagFlowLayout.setOnTagClickListener(new MyTagClickOnListener());
+        }
+    }
+
     class MyTagClickOnListener implements TagFlowLayout.OnTagClickListener {
 
         @Override
@@ -231,7 +267,7 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
             String url = audiaItemBean.getVersions().get(position).getAudioUrl();
             if (!versionBean.getAudioUrl().equals(url)) {
                 startPlay();
-                application.setCurrentPlayBean(gerateHistoryData());
+                application.setCurrentPlayBean(audiaItemBean, versionBean);
                 updateSeekBak();
             }
 
@@ -366,6 +402,7 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        unregisterReceiver(mBroadcastReceiver);
     }
 
     protected void initListener() {
@@ -408,7 +445,7 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
                             /** 默认播放第一条 **/
                             versionBean = audiaItemBean.getVersions().get(0);
                             initData();
-                            application.setCurrentPlayBean(gerateHistoryData());
+                            application.setCurrentPlayBean(audiaItemBean, versionBean);
                         }
                     }
                 }
@@ -423,7 +460,7 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
                             /** 默认播放第一条 **/
                             versionBean = audiaItemBean.getVersions().get(0);
                             initData();
-                            application.setCurrentPlayBean(gerateHistoryData());
+                            application.setCurrentPlayBean(audiaItemBean, versionBean);
                         }
                     }
                 }
@@ -439,8 +476,7 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
                 clickPlayOrPause();
                 break;
             case R.id.play_recent_list_btn:
-                showPopupWindowView(view);
-                playerRecentList.requestFocus();
+                showDrawerLayout();
                 break;
         }
 
@@ -475,30 +511,29 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
     }
 
 
-    private PopupOrderPriceDetail popupWindow;
     private PopupWindowAdapter popupWindowAdapter;
-    private View contentView;
     private int id;
 
-    private void showPopupWindowView(View view) {
+    private void initDrawerListData() {
         id = audiaItemBean.getId();
         final List<AudiaItemBean> audiaItemBeen = PlayListCache.getInstance(this).getList();
-        contentView = LayoutInflater.from(this).inflate(R.layout.popup_history_lauout, null);
-        popupWindow = new PopupOrderPriceDetail(this, contentView);
-        ListView listView = (ListView) contentView.findViewById(R.id.pop_list_view);
+        ListView listView = (ListView) findViewById(R.id.play_pop_list_view);
         popupWindowAdapter = new PopupWindowAdapter(this, audiaItemBeen, id);
         listView.setAdapter(popupWindowAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                int audioId = audiaItemBeen.get(position).getId();
-                int audioType = audiaItemBeen.get(position).getVersions().get(0).getType();
-                getData(audioId, audioType);
+            public void onItemClick(AdapterView<?> parent, View view, int position, long iid) {
+                audiaItemBean = audiaItemBeen.get(position);
+                id = audiaItemBean.getId();
+                currentPlayType = -1;
+                initData();
+                if (popupWindowAdapter != null) {
+                    popupWindowAdapter.updateSelected(id);
+                }
+                application.setCurrentPlayBean(audiaItemBean, versionBean);
             }
         });
-
-        popupWindow.showUp(view);
     }
 
 
@@ -638,33 +673,27 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
         return str;
     }
 
-//    private void addHistoryToDatabase() {
-//        try {
-//            HistoryBean historyBean = gerateHistoryData();
-//            if (HistoryManager.getInstance(this).queryIdExits(audiaItemBean.getId())) {
-//                //如果存在就删掉 继续更新
-//                HistoryManager.getInstance(this).deleteContentById(audiaItemBean.getId());
-//            }
-//            HistoryManager.getInstance(this).insertContent(historyBean);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-    private HistoryBean gerateHistoryData() {
-        HistoryBean historyBean = new HistoryBean();
-        if (audiaItemBean != null && versionBean != null) {
-            historyBean.setId(audiaItemBean.getId());
-            historyBean.setName(audiaItemBean.getName());
-            historyBean.setTeacherName(audiaItemBean.getTeacherName());
-            historyBean.setSmallImg(audiaItemBean.getSmallImg());
-            historyBean.setAudioPath(versionBean.getAudioPath());
-            historyBean.setAudioUrl(versionBean.getAudioUrl());
-            historyBean.setPlayTime(versionBean.getPlayTime());
-            historyBean.setType(versionBean.getType());
-        }
-        return historyBean;
+    public void registerBoradcastReceiver() {
+        IntentFilter myIntentFilter = new IntentFilter();
+        myIntentFilter.addAction(Constants.ACTION_NAME);
+        //注册广播
+        registerReceiver(mBroadcastReceiver, myIntentFilter);
     }
+
+    BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(Constants.ACTION_NAME)) {
+                if (application.getCurrentPlayBean() != null) {
+                    audiaItemBean = application.getCurrentPlayBean().getAudiaItemBean();
+                    versionBean = application.getCurrentPlayBean().getVersionBean();
+                    playCompletionUpdate();
+                }
+            }
+        }
+    };
 
     @Override
     public void onBackPressed() {

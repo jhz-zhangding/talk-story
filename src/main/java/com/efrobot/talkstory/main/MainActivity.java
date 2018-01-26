@@ -1,6 +1,9 @@
 package com.efrobot.talkstory.main;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,18 +23,16 @@ import com.efrobot.library.mvp.utils.PreferencesUtils;
 import com.efrobot.talkstory.R;
 import com.efrobot.talkstory.TalkStoryApplication;
 import com.efrobot.talkstory.adapter.AlbumItemDecortion;
+import com.efrobot.talkstory.adapter.AlbumRecylerAdapter;
 import com.efrobot.talkstory.adapter.RecentStoryAdapter;
 import com.efrobot.talkstory.albumdetail.AlbumDetailActivity;
-import com.efrobot.talkstory.adapter.AlbumRecylerAdapter;
 import com.efrobot.talkstory.allalbum.AllAlbumActivity;
 import com.efrobot.talkstory.base.WithPlayerBaseActivity;
 import com.efrobot.talkstory.bean.AlbumBean;
 import com.efrobot.talkstory.bean.AlbumItemBean;
 import com.efrobot.talkstory.bean.AudiaBean;
 import com.efrobot.talkstory.bean.AudiaItemBean;
-import com.efrobot.talkstory.bean.HistoryBean;
 import com.efrobot.talkstory.bean.VersionBean;
-import com.efrobot.talkstory.db.HistoryManager;
 import com.efrobot.talkstory.env.Constants;
 import com.efrobot.talkstory.env.PlayListCache;
 import com.efrobot.talkstory.http.HttpParamUtils;
@@ -77,6 +78,7 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
     private TalkStoryApplication application;
 
     private int lastid = 0;
+    private int lastType = 0;
 
     private int visibleItemCount;
     private int visibleLastIndex;
@@ -98,6 +100,7 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
     @Override
     protected void initView() {
         lastid = PreferencesUtils.getInt(getContext(), "lastId");
+        lastType = PreferencesUtils.getInt(getContext(), "lastType");
         httpUtils = new HttpUtils(false);
 
         application = TalkStoryApplication.from(this);
@@ -119,25 +122,36 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
         setHttpData();
 
         setFirstIntoHistoryData();
+        registerMainBoradcastReceiver();
     }
 
     private boolean isNeedSetHistory = false;
 
     private void setFirstIntoHistoryData() {
         //设置历史记录
-        List<HistoryBean> historyBeanList = HistoryManager.getInstance(this).queryAllContent();
+        List<AudiaItemBean> historyBeanList = PlayListCache.getInstance(this).getList();
         if (historyBeanList != null && historyBeanList.size() > 0) {
             for (int i = 0; i < historyBeanList.size(); i++) {
                 if (historyBeanList.get(i).getId() == lastid) {
-                    application.setCurrentPlayBean(historyBeanList.get(i));
-                    isNeedSetHistory = false;
-                    break;
+                    AudiaItemBean audiaItemBean = historyBeanList.get(i);
+                    List<VersionBean> versionBeanList = audiaItemBean.getVersions();
+                    for (int j = 0; j < versionBeanList.size(); j++) {
+                        if (lastType == versionBeanList.get(j).getType()) {
+                            application.setCurrentPlayBean(audiaItemBean, versionBeanList.get(i));
+                            isNeedSetHistory = false;
+                            break;
+                        }
+                    }
                 }
             }
         } else {
             isNeedSetHistory = true;
         }
         updatePlayerView();
+    }
+
+    private void setCurrentBean() {
+
     }
 
     @Override
@@ -202,7 +216,7 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
 
                         /**防止第一次进入没有历史记录从而底部播放器没有内容**/
                         if (application.getCurrentPlayBean() == null) {
-                            application.setCurrentPlayBean(gerateHistoryData(audiaBean.getData().get(0)));
+                            application.setCurrentPlayBean(audiaBean.getData().get(0), -1);
                             updatePlayerView();
                         }
 
@@ -229,23 +243,6 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
 
             }
         });
-    }
-
-    private HistoryBean gerateHistoryData(AudiaItemBean audiaItemBean) {
-        HistoryBean historyBean = new HistoryBean();
-        historyBean.setId(audiaItemBean.getId());
-        historyBean.setName(audiaItemBean.getName());
-        historyBean.setTeacherName(audiaItemBean.getTeacherName());
-        historyBean.setSmallImg(audiaItemBean.getSmallImg());
-
-        if (audiaItemBean.getVersions() != null && audiaItemBean.getVersions().size() > 0) {
-            VersionBean versionBean = audiaItemBean.getVersions().get(0);
-            historyBean.setAudioPath(versionBean.getAudioPath());
-            historyBean.setAudioUrl(versionBean.getAudioUrl());
-            historyBean.setPlayTime(versionBean.getPlayTime());
-            historyBean.setType(versionBean.getType());
-        }
-        return historyBean;
     }
 
     private void setListener() {
@@ -349,8 +346,31 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
         return super.isShouldHideInput(v, event);
     }
 
+    public void registerMainBoradcastReceiver() {
+        IntentFilter myIntentFilter = new IntentFilter();
+        myIntentFilter.addAction(Constants.ACTION_NAME);
+        //注册广播
+        registerReceiver(mBroadcastReceiver, myIntentFilter);
+    }
+
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            L.e(TAG, "接收到广播：" + action);
+            if (action.equals(Constants.ACTION_NAME)) {
+                if (recentStoryAdapter != null) {
+                    recentStoryAdapter.notifyDataSetChanged();
+                }
+            }
+        }
+
+    };
+
+
     @Override
     protected void onDestroy() {
+        unregisterReceiver(mBroadcastReceiver);
         application.stopMediaService();
         super.onDestroy();
     }

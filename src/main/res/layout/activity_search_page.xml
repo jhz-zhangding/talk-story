@@ -9,8 +9,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/base_gray"
-        >
+        android:background="@color/base_gray">
+
         <include layout="@layout/search_edit_layout" />
 
         <TextView
@@ -36,11 +36,11 @@
                 android:id="@+id/tag_all_btn"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
+                android:background="#FFF0F0F0"
                 android:gravity="center_vertical"
                 android:paddingLeft="60dp"
                 android:text="全部"
                 android:textColor="@color/black"
-                android:background="#FFF0F0F0"
                 android:textSize="22sp" />
 
             <ExpandableListView
