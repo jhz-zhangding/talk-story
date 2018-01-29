@@ -60,7 +60,7 @@ public class MediaPlayService extends Service implements CacheListener {
         VIDEO_ID = intent.getIntExtra("media_id", -1);
         Log.e("MediaPlayService", "onStartCommand:" + "media_url = " + VIDEO_URL);
         getMediaPlayer();
-        if (!TextUtils.isEmpty(VIDEO_URL)) {
+        if (!TextUtils.isEmpty(VIDEO_URL) && !application.isStopService) {
             checkCachedState();
             startVideo();
         }
@@ -133,6 +133,7 @@ public class MediaPlayService extends Service implements CacheListener {
     private void startPlayNext() {
         boolean isContains = false;
         List<AudiaItemBean> list = PlayListCache.getInstance(this).getList();
+        audiaItemBean = list.get(0);
         if (list != null) {
             int nextAudioIndex = 0;
             for (int i = 0; i < list.size(); i++) {

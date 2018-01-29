@@ -4,17 +4,16 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.efrobot.library.mvp.utils.L;
-import com.efrobot.talkstory.bean.AudiaBean;
 import com.efrobot.talkstory.bean.AudiaItemBean;
 import com.efrobot.talkstory.bean.HistoryBean;
 import com.efrobot.talkstory.bean.VersionBean;
-import com.efrobot.talkstory.db.HistoryManager;
 import com.efrobot.talkstory.utils.PreferencesUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * 缓存当前播放列表 用于切换上一条和下一条
@@ -27,6 +26,8 @@ public class PlayListCache {
     public static List<AudiaItemBean> list = new ArrayList<>();
 
     private static Context mContext;
+
+    private int currentPlayMode = 1;
 
     public static PlayListCache getInstance(Context context) {
         if (instance == null) {
@@ -106,28 +107,45 @@ public class PlayListCache {
      * @return
      */
     public AudiaItemBean getNextAudio(int id) {
+        currentPlayMode = PreferencesUtils.getInt(mContext, "playMode", Constants.ORDER_PLAY_MODE);
         L.e("PlayListCache", "getNextAudio");
         boolean isContains = false;
         AudiaItemBean audiaItemBean = null;
         int nextAudioIndex = 0;
-        if (list != null && list.size() > 0) {
-            for (int i = 0; i < list.size(); i++) {
-                if (id == list.get(i).getId()) {
-                    nextAudioIndex = i + 1;
+        List<AudiaItemBean> mList = getList();
+        if (mList != null && mList.size() > 0) {
+            for (int i = 0; i < mList.size(); i++) {
+                if (id == mList.get(i).getId()) {
+                    nextAudioIndex = i;
                     isContains = true;
                     break;
                 }
+            }
+
+            switch (currentPlayMode) {
+                case Constants.ORDER_PLAY_MODE:
+                    nextAudioIndex = nextAudioIndex + 1;
+                    if (nextAudioIndex >= mList.size()) {
+                        nextAudioIndex = 0;
+                    }
+                    break;
+                case Constants.RANDOM_PLAY_MODE:
+                    nextAudioIndex = new Random().nextInt(mList.size());
+                    break;
+                case Constants.CIRCEL_PLAY_MODE:
+
+                    break;
             }
 
             if (!isContains) {
                 nextAudioIndex = 0;
             }
 
-            if (nextAudioIndex >= list.size()) {
+            if (nextAudioIndex >= mList.size()) {
                 nextAudioIndex = 0;
             }
             L.e("PlayListCache", "nextAudioIndex = " + nextAudioIndex);
-            audiaItemBean = list.get(nextAudioIndex);
+            audiaItemBean = mList.get(nextAudioIndex);
         }
         return audiaItemBean;
     }
@@ -140,20 +158,43 @@ public class PlayListCache {
      */
     public AudiaItemBean getLastAudio(int id) {
         L.e("PlayListCache", "");
+        boolean isContains = false;
         AudiaItemBean audiaItemBean = null;
         int lastAudioIndex = 0;
-        if (list != null && list.size() > 0) {
-            for (int i = 0; i < list.size(); i++) {
-                if (id == list.get(i).getId()) {
-                    lastAudioIndex = i - 1;
+        List<AudiaItemBean> mList = getList();
+        if (mList != null && mList.size() > 0) {
+            for (int i = 0; i < mList.size(); i++) {
+                if (id == mList.get(i).getId()) {
+                    lastAudioIndex = i;
+                    isContains = true;
                     break;
                 }
             }
 
-            if (lastAudioIndex < 0) {
-                lastAudioIndex = list.size() - 1;
+            switch (currentPlayMode) {
+                case Constants.ORDER_PLAY_MODE:
+                    lastAudioIndex = lastAudioIndex - 1;
+                    if (lastAudioIndex < 0) {
+                        lastAudioIndex = mList.size() - 1;
+                    }
+                    break;
+                case Constants.RANDOM_PLAY_MODE:
+                    lastAudioIndex = new Random().nextInt(mList.size());
+                    break;
+                case Constants.CIRCEL_PLAY_MODE:
+
+                    break;
             }
-            audiaItemBean = list.get(lastAudioIndex);
+
+            if (!isContains) {
+                lastAudioIndex = 0;
+            }
+
+            if (lastAudioIndex < 0) {
+                lastAudioIndex = 0;
+            }
+
+            audiaItemBean = mList.get(lastAudioIndex);
 
         }
         return audiaItemBean;

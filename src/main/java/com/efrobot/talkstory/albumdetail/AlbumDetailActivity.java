@@ -1,5 +1,6 @@
 package com.efrobot.talkstory.albumdetail;
 
+import android.content.Intent;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,7 +17,6 @@ import com.efrobot.talkstory.bean.AlbumDetail;
 import com.efrobot.talkstory.bean.AlbumItemBean;
 import com.efrobot.talkstory.bean.AudiaItemBean;
 import com.efrobot.talkstory.bean.AudioDetailBean;
-import com.efrobot.talkstory.db.HistoryManager;
 import com.efrobot.talkstory.env.Constants;
 import com.efrobot.talkstory.env.PlayListCache;
 import com.efrobot.talkstory.http.HttpParamUtils;
@@ -26,8 +26,6 @@ import com.efrobot.talkstory.utils.OptionsUtils;
 import com.google.gson.Gson;
 import com.jingchen.pulltorefresh.PullToRefreshLayout;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.imageaware.ImageAware;
-import com.nostra13.universalimageloader.core.imageaware.ImageViewAware;
 
 import org.xutils.common.Callback;
 
@@ -64,6 +62,13 @@ public class AlbumDetailActivity extends WithPlayerBaseActivity implements View.
     @Override
     protected int getZdContentView() {
         return R.layout.activity_album_detail;
+    }
+
+    @Override
+    protected void updateAdapter() {
+        if (detailListAdapter != null) {
+            detailListAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -225,7 +230,7 @@ public class AlbumDetailActivity extends WithPlayerBaseActivity implements View.
         int id = view.getId();
         switch (id) {
             case R.id.album_back_btn:
-                finish();
+                finishAfter();
                 break;
         }
     }
@@ -245,4 +250,27 @@ public class AlbumDetailActivity extends WithPlayerBaseActivity implements View.
 
         pullToRefreshLayout.refreshFinish(PullToRefreshLayout.SUCCEED);
     }
+
+    @Override
+    public void onBackPressed() {
+        finishAfter();
+        super.onBackPressed();
+    }
+
+    private void finishAfter() {
+        setResult(Constants.UPDATE_PROGRESS_RESULT, new Intent());
+        finish();
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Constants.UPDATE_PROGRESS_RESULT) {
+            if (detailListAdapter != null) {
+                detailListAdapter.notifyDataSetChanged();
+            }
+        }
+    }
+
 }

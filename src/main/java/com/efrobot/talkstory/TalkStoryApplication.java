@@ -55,6 +55,8 @@ public class TalkStoryApplication extends Application {
     //存储播放历史条数最大阀值
     private final int MAX_HISTORY_NUM = 100;
 
+    public boolean isStopService = false;
+
     @Override
     public void onCreate() {
         super.onCreate();

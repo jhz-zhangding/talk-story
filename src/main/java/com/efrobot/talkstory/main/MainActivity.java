@@ -88,6 +88,13 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
         return R.layout.activity_main;
     }
 
+    @Override
+    protected void updateAdapter() {
+        if (recentStoryAdapter != null) {
+            recentStoryAdapter.notifyDataSetChanged();
+        }
+    }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
@@ -104,6 +111,7 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
         httpUtils = new HttpUtils(false);
 
         application = TalkStoryApplication.from(this);
+        application.isStopService = false;
 
         searchEt = (EditText) findViewById(R.id.main_search_edit);
         startSearchBtn = (TextView) findViewById(R.id.main_search_edit_btn);
@@ -371,6 +379,7 @@ public class MainActivity extends WithPlayerBaseActivity implements View.OnClick
     @Override
     protected void onDestroy() {
         unregisterReceiver(mBroadcastReceiver);
+        application.isStopService = true;
         application.stopMediaService();
         super.onDestroy();
     }

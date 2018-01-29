@@ -19,6 +19,9 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -90,6 +93,8 @@ public abstract class WithPlayerBaseActivity extends Activity {
     protected abstract void initListener();
 
     protected abstract int getZdContentView();
+
+    protected abstract void updateAdapter();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -171,6 +176,7 @@ public abstract class WithPlayerBaseActivity extends Activity {
                     }
 
                     updatePlayerView();
+                    updateAdapter();
                     break;
                 case R.id.play_next_btn:
                     //下一条
@@ -187,6 +193,7 @@ public abstract class WithPlayerBaseActivity extends Activity {
                         }
                     }
                     updatePlayerView();
+                    updateAdapter();
                     break;
                 case R.id.base_play_pause_and_play:
                     //开始暂停
@@ -418,6 +425,7 @@ public abstract class WithPlayerBaseActivity extends Activity {
      */
     public void updatePlayerView() {
         updatePlayModeImage();
+        updateRotateImageAnim();
 
         if (application.getCurrentPlayBean() != null) {
             playNameTv.setText(application.getCurrentPlayBean().getAudiaItemBean().getName());
@@ -439,6 +447,34 @@ public abstract class WithPlayerBaseActivity extends Activity {
         if (mHandle.hasMessages(UPDATE_SEEKBAR_VIEW))
             mHandle.removeMessages(UPDATE_SEEKBAR_VIEW);
         mHandle.sendEmptyMessage(UPDATE_SEEKBAR_VIEW);
+    }
+
+    private void updateRotateImageAnim() {
+
+        if (application.isPlayingStory) {
+            startRotateImageAnim();
+        } else {
+            stopRotateImageAnim();
+
+        }
+
+    }
+
+    Animation operatingAnim;
+
+    private void startRotateImageAnim() {
+        operatingAnim = AnimationUtils.loadAnimation(this, R.anim.rotate_image_anim);
+        LinearInterpolator lin = new LinearInterpolator();
+        operatingAnim.setInterpolator(lin);
+        if (operatingAnim != null) {
+            playImage.startAnimation(operatingAnim);
+        }
+    }
+
+    private void stopRotateImageAnim() {
+        if (operatingAnim != null) {
+            playImage.clearAnimation();
+        }
     }
 
 

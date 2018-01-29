@@ -56,6 +56,11 @@ public class AllAlbumActivity extends WithPlayerBaseActivity implements PullToRe
     }
 
     @Override
+    protected void updateAdapter() {
+
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         httpUtils = new HttpUtils(false);

@@ -140,12 +140,12 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
         mSeekBar.setOnSeekBarChangeListener(new MySeekBarChangeListener());
 
         initData();
-        initDrawerListData();
     }
 
     private void showDrawerLayout() {
 
         if (!drawerLayout.isDrawerOpen(Gravity.RIGHT)) {
+            initDrawerListData();
             drawerLayout.openDrawer(Gravity.RIGHT);
         } else {
             drawerLayout.closeDrawer(Gravity.RIGHT);
@@ -343,38 +343,30 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
         switch (type) {
             case DOUBLE_LANGUAGE:
                 if (isSelected) {
-                    textView.setBackgroundResource(R.drawable.double_language_selected);
-                    textView.setTextColor(Color.WHITE);
+                    textView.setBackgroundResource(R.drawable.play_page_double_language_selected);
                 } else {
-                    textView.setBackgroundResource(R.drawable.double_language_unselected);
-                    textView.setTextColor(Color.parseColor("#FF60C1D6"));
+                    textView.setBackgroundResource(R.drawable.play_page_double_language_unselected);
                 }
                 break;
             case ENGLISH_LANGUAGE:
                 if (isSelected) {
-                    textView.setBackgroundResource(R.drawable.english_language_selected);
-                    textView.setTextColor(Color.WHITE);
+                    textView.setBackgroundResource(R.drawable.play_page_english_language_selected);
                 } else {
-                    textView.setBackgroundResource(R.drawable.english_language_unselected);
-                    textView.setTextColor(Color.parseColor("#FFE98C8C"));
+                    textView.setBackgroundResource(R.drawable.play_page_english_language_unselected);
                 }
                 break;
             case CHINESE_LANGUAGE:
                 if (isSelected) {
-                    textView.setBackgroundResource(R.drawable.chinese_language_selected);
-                    textView.setTextColor(Color.WHITE);
+                    textView.setBackgroundResource(R.drawable.play_page_chinese_language_selected);
                 } else {
-                    textView.setBackgroundResource(R.drawable.chinese_language_unselected);
-                    textView.setTextColor(Color.parseColor("#FFF5A623"));
+                    textView.setBackgroundResource(R.drawable.play_page_chinese_language_unselected);
                 }
                 break;
             case SOURCE_LANGUAGE:
                 if (isSelected) {
-                    textView.setBackgroundResource(R.drawable.source_language_selected);
-                    textView.setTextColor(Color.WHITE);
+                    textView.setBackgroundResource(R.drawable.play_page_source_language_selected);
                 } else {
-                    textView.setBackgroundResource(R.drawable.source_language_unselected);
-                    textView.setTextColor(Color.parseColor("#cccccc"));
+                    textView.setBackgroundResource(R.drawable.play_page_source_language_unselected);
                 }
                 break;
         }
@@ -444,12 +436,14 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
                         if (audiaItemBean.getVersions().size() > 0) {
                             /** 默认播放第一条 **/
                             versionBean = audiaItemBean.getVersions().get(0);
+                            currentPlayType = versionBean.getType();
                             initData();
                             application.setCurrentPlayBean(audiaItemBean, versionBean);
                         }
                     }
                 }
                 updateSeekBak();
+                updateTagAdapter();
                 break;
             case R.id.play_next_btn:
                 //下一条
@@ -459,12 +453,14 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
                         if (audiaItemBean.getVersions().size() > 0) {
                             /** 默认播放第一条 **/
                             versionBean = audiaItemBean.getVersions().get(0);
+                            currentPlayType = versionBean.getType();
                             initData();
                             application.setCurrentPlayBean(audiaItemBean, versionBean);
                         }
                     }
                 }
                 updateSeekBak();
+                updateTagAdapter();
                 break;
             case R.id.play_and_pause_btn:
 
@@ -482,14 +478,20 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
 
     }
 
+    private void updateTagAdapter() {
+        if (myTagAdapter != null) {
+            myTagAdapter.notifyDataChanged();
+        }
+    }
+
     public void updatePlayModeImage() {
         int playMode = PreferencesUtils.getInt(getContext(), "playMode");
         if (playMode == Constants.ORDER_PLAY_MODE) {
-            playerModeBtn.setBackgroundResource(R.mipmap.player_order);
+            playerModeBtn.setBackgroundResource(R.mipmap.play_page_order_image);
         } else if (playMode == Constants.RANDOM_PLAY_MODE) {
-            playerModeBtn.setBackgroundResource(R.mipmap.player_random);
+            playerModeBtn.setBackgroundResource(R.mipmap.play_page_random_image);
         } else if (playMode == Constants.CIRCEL_PLAY_MODE) {
-            playerModeBtn.setBackgroundResource(R.mipmap.player_circle);
+            playerModeBtn.setBackgroundResource(R.mipmap.play_page_circle_image);
         }
     }
 
@@ -603,11 +605,11 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
                     if (application.isPlayingStory) {
                         //播放
                         isRotating = false;
-                        playerStartOrPauseBtn.setBackgroundResource(R.mipmap.player_pause);
+                        playerStartOrPauseBtn.setBackgroundResource(R.mipmap.play_page_pause_play);
                     } else {
                         //暂停
                         stopRotateImageAnim();
-                        playerStartOrPauseBtn.setBackgroundResource(R.mipmap.player_start);
+                        playerStartOrPauseBtn.setBackgroundResource(R.mipmap.play_page_start_play);
                     }
 
                     break;

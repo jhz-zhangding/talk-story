@@ -83,14 +83,14 @@
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="20dp"
                     android:minWidth="450dp"
-                    android:visibility="gone" />
+                    android:visibility="visible" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:layout_marginBottom="30dp"
+                android:layout_marginBottom="20dp"
                 android:orientation="vertical">
 
                 <RelativeLayout
@@ -145,36 +145,36 @@
                         android:id="@+id/play_mode_btn"
                         android:layout_width="50dp"
                         android:layout_height="50dp"
-                        android:background="@mipmap/player_random"
+                        android:background="@mipmap/play_page_random_image"
                         android:padding="10dp" />
 
                     <ImageView
                         android:id="@+id/play_last_btn"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
                         android:layout_marginLeft="180dp"
-                        android:background="@mipmap/player_last" />
+                        android:background="@mipmap/play_page_last_play" />
 
                     <ImageView
                         android:id="@+id/play_and_pause_btn"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="55dp"
+                        android:layout_height="55dp"
                         android:layout_marginLeft="80dp"
-                        android:background="@mipmap/player_start" />
+                        android:background="@mipmap/play_page_start_play" />
 
                     <ImageView
                         android:id="@+id/play_next_btn"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
                         android:layout_marginLeft="80dp"
-                        android:background="@mipmap/player_next" />
+                        android:background="@mipmap/play_page_next_play" />
 
                     <ImageView
                         android:id="@+id/play_recent_list_btn"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
                         android:layout_marginLeft="180dp"
-                        android:background="@mipmap/player_recent_list" />
+                        android:background="@mipmap/play_page_list_btn" />
                 </LinearLayout>
             </LinearLayout>
         </RelativeLayout>

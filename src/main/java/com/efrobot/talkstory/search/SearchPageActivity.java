@@ -19,6 +19,7 @@ import com.efrobot.talkstory.R;
 import com.efrobot.talkstory.albumdetail.AlbumDetailActivity;
 import com.efrobot.talkstory.albumdetail.DetailListAdapter;
 import com.efrobot.talkstory.base.BaseActivity;
+import com.efrobot.talkstory.base.WithPlayerBaseActivity;
 import com.efrobot.talkstory.bean.AlbumBean;
 import com.efrobot.talkstory.bean.AlbumItemBean;
 import com.efrobot.talkstory.bean.AudiaBean;
@@ -38,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class SearchPageActivity extends BaseActivity implements PullToRefreshLayout.OnPullListener, View.OnClickListener {
+public class SearchPageActivity extends WithPlayerBaseActivity implements PullToRefreshLayout.OnPullListener, View.OnClickListener {
 
     private final String TAG = SearchPageActivity.class.getSimpleName();
 
@@ -90,21 +91,27 @@ public class SearchPageActivity extends BaseActivity implements PullToRefreshLay
         ((Activity) context).startActivityForResult(intent, requestCode);
     }
 
-
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search_page);
-
-        keyword = getIntent().getStringExtra("keyWord") == null ? "" : getIntent().getStringExtra("keyWord");
-
-        initView();
-
-        getHttpData();
+    protected void initListener() {
 
     }
 
-    private void initView() {
+    @Override
+    protected int getZdContentView() {
+        return R.layout.activity_search_page;
+    }
+
+    @Override
+    protected void updateAdapter() {
+        if (detailListAdapter != null) {
+            detailListAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    protected void initView() {
+        keyword = getIntent().getStringExtra("keyWord") == null ? "" : getIntent().getStringExtra("keyWord");
+
         tagListView = (ExpandableListView) findViewById(R.id.search_tag_list_view);
 
         pullToRefreshLayout = (PullToRefreshLayout) findViewById(R.id.refresh_view);
@@ -156,6 +163,10 @@ public class SearchPageActivity extends BaseActivity implements PullToRefreshLay
                 return false;
             }
         });
+
+
+        getHttpData();
+        updatePlayerView();
     }
 
     private class AlbumItemClickListener implements AdapterView.OnItemClickListener {
@@ -338,8 +349,6 @@ public class SearchPageActivity extends BaseActivity implements PullToRefreshLay
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.back:
-                L.e("BaseActivity", "screenWidth = " + getScreenWidth() + "  screenHeight = " + getScreenHeight());
-
                 finishAfter();
                 break;
             case R.id.main_search_edit_btn:
@@ -366,6 +375,16 @@ public class SearchPageActivity extends BaseActivity implements PullToRefreshLay
                 albumPage++;
                 getHttpAlbumData();
                 break;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Constants.UPDATE_PROGRESS_RESULT) {
+            if (detailListAdapter != null) {
+                detailListAdapter.notifyDataSetChanged();
+            }
         }
     }
 
