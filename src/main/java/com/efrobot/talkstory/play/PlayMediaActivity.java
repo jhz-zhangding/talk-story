@@ -485,7 +485,7 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
     }
 
     public void updatePlayModeImage() {
-        int playMode = PreferencesUtils.getInt(getContext(), "playMode");
+        int playMode = PreferencesUtils.getInt(getContext(), "playMode", Constants.ORDER_PLAY_MODE);
         if (playMode == Constants.ORDER_PLAY_MODE) {
             playerModeBtn.setBackgroundResource(R.mipmap.play_page_order_image);
         } else if (playMode == Constants.RANDOM_PLAY_MODE) {
@@ -691,7 +691,9 @@ public class PlayMediaActivity extends BaseActivity implements View.OnClickListe
                 if (application.getCurrentPlayBean() != null) {
                     audiaItemBean = application.getCurrentPlayBean().getAudiaItemBean();
                     versionBean = application.getCurrentPlayBean().getVersionBean();
+                    currentPlayType = versionBean.getType();
                     playCompletionUpdate();
+                    mHandle.sendEmptyMessage(UPDATE_PLAY_OR_PAUSE_VIEW);
                 }
             }
         }

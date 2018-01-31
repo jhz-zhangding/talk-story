@@ -31,6 +31,7 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.efrobot.library:framework:1.0.58'
     compile 'com.efrobot.library.net:mvpnetlibrary:2.0.6'
     compile 'com.danikula:videocache:2.7.0'
     //    compile 'de.hdodenhof:circleimageview:2.2.0'

@@ -133,7 +133,7 @@ public class PlayListCache {
                     nextAudioIndex = new Random().nextInt(mList.size());
                     break;
                 case Constants.CIRCEL_PLAY_MODE:
-
+                    nextAudioIndex = nextAudioIndex + 1;
                     break;
             }
 

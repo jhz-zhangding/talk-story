@@ -1,7 +1,10 @@
 package com.efrobot.talkstory.service;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Handler;
@@ -14,6 +17,7 @@ import android.widget.Toast;
 
 import com.danikula.videocache.CacheListener;
 import com.danikula.videocache.HttpProxyCacheServer;
+import com.efrobot.library.RobotManager;
 import com.efrobot.library.mvp.utils.L;
 import com.efrobot.talkstory.TalkStoryApplication;
 import com.efrobot.talkstory.bean.AudiaItemBean;
@@ -47,9 +51,17 @@ public class MediaPlayService extends Service implements CacheListener {
 
     private int currentPlayMode = 1;
 
+    private boolean isMaskClose = false;
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         proxy = TalkStoryApplication.getProxy(this);
+
+        int maskState = RobotManager.getInstance(this).getMaskState();
+        L.e(TAG, "面罩开关 maskState = :" + maskState);
+        if (maskState == 0) {
+            isMaskClose = true;
+        }
 
 
         currentPlayMode = PreferencesUtils.getInt(this, "playMode", Constants.ORDER_PLAY_MODE);
@@ -60,10 +72,12 @@ public class MediaPlayService extends Service implements CacheListener {
         VIDEO_ID = intent.getIntExtra("media_id", -1);
         Log.e("MediaPlayService", "onStartCommand:" + "media_url = " + VIDEO_URL);
         getMediaPlayer();
-        if (!TextUtils.isEmpty(VIDEO_URL) && !application.isStopService) {
+        if (!TextUtils.isEmpty(VIDEO_URL) && !application.isStopService && !isMaskClose) {
             checkCachedState();
             startVideo();
         }
+        registerLiboard();
+
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -170,6 +184,7 @@ public class MediaPlayService extends Service implements CacheListener {
                     VIDEO_ID = audiaItemBean.getId();
                 } else {
                     //版本都播完，开始播放下一个故事
+                    currentPlayMode = PreferencesUtils.getInt(this, "playMode", Constants.ORDER_PLAY_MODE);
                     switch (currentPlayMode) {
                         case Constants.ORDER_PLAY_MODE:
                             nextAudioIndex = nextAudioIndex + 1;
@@ -221,7 +236,8 @@ public class MediaPlayService extends Service implements CacheListener {
     }
 
     public void pause() {
-        mediaPlayer.pause();
+        if (mediaPlayer != null)
+            mediaPlayer.pause();
         application.isPlayingStory = false;
     }
 
@@ -284,11 +300,43 @@ public class MediaPlayService extends Service implements CacheListener {
 //        progressBar.setProgress(videoProgress);
     }
 
+    private void registerLiboard() {
+        IntentFilter dynamic_filter = new IntentFilter();
+        dynamic_filter.addAction(ROBOT_MASK_CHANGE);            //添加动态广播的Action
+        registerReceiver(lidBoardReceive, dynamic_filter);
+    }
+
+    /**
+     * 监听盖子状态
+     */
+    public final static String ROBOT_MASK_CHANGE = "android.intent.action.MASK_CHANGED";
+    public final static String KEYCODE_MASK_ONPROGRESS = "KEYCODE_MASK_ONPROGRESS"; //开闭状态
+    public final static String KEYCODE_MASK_CLOSE = "KEYCODE_MASK_CLOSE"; //关闭面罩
+    public final static String KEYCODE_MASK_OPEN = "KEYCODE_MASK_OPEN";  //打开面罩
+    private BroadcastReceiver lidBoardReceive = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (ROBOT_MASK_CHANGE.equals(intent.getAction())) {
+                boolean isClose = intent.getBooleanExtra(KEYCODE_MASK_CLOSE, false);
+                if (isClose) {
+                    pause();
+                    //发送广播
+                    Intent mIntent = new Intent(Constants.ACTION_NAME);
+                    sendBroadcast(mIntent);
+
+                }
+
+            }
+        }
+    };
+
     @Override
     public void onDestroy() {
         super.onDestroy();
         mediaPlayer.stop();
         application.isPlayingStory = false;
+        unregisterReceiver(lidBoardReceive);
         Log.e("MediaPlayService", "onDestroy");
     }
 
@@ -302,4 +350,6 @@ public class MediaPlayService extends Service implements CacheListener {
     public boolean onUnbind(Intent intent) {
         return super.onUnbind(intent);
     }
+
+
 }

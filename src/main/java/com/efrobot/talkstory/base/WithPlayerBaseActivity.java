@@ -284,7 +284,7 @@ public abstract class WithPlayerBaseActivity extends Activity {
     private int[] playMode = new int[]{Constants.ORDER_PLAY_MODE, Constants.RANDOM_PLAY_MODE, Constants.CIRCEL_PLAY_MODE};
 
     public void updatePlayModeImage() {
-        int playMode = PreferencesUtils.getInt(getContext(), "playMode");
+        int playMode = PreferencesUtils.getInt(getContext(), "playMode", Constants.ORDER_PLAY_MODE);
         if (playMode == Constants.ORDER_PLAY_MODE) {
             playModeImg.setBackgroundResource(R.mipmap.player_order);
         } else if (playMode == Constants.RANDOM_PLAY_MODE) {
@@ -472,9 +472,9 @@ public abstract class WithPlayerBaseActivity extends Activity {
     }
 
     private void stopRotateImageAnim() {
-        if (operatingAnim != null) {
+//        if (operatingAnim != null) {
             playImage.clearAnimation();
-        }
+//        }
     }
 
 

@@ -75,6 +75,7 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.efrobot.library.mvp/mvplibrary/0.0.15/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.efrobot.library.net/mvpnetlibrary/2.0.6/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.efrobot.library.urlconfig/urlconfig/0.0.19/jars" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.efrobot.library/framework/1.0.58/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.hyman/flowlayout-lib/1.1.2/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.song/circleimage/1.0.1/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/org.xutils/xutils/3.4.0/jars" />
@@ -103,6 +104,7 @@
     <orderEntry type="library" exported="" name="slf4j-api-1.7.21" level="project" />
     <orderEntry type="library" exported="" name="support-core-utils-25.3.1" level="project" />
     <orderEntry type="library" exported="" name="support-fragment-25.3.1" level="project" />
+    <orderEntry type="library" exported="" name="framework-1.0.58" level="project" />
     <orderEntry type="library" exported="" name="ormlite-core-5.0" level="project" />
     <orderEntry type="library" exported="" name="mvplibrary-0.0.15" level="project" />
     <orderEntry type="library" exported="" name="circleimage-1.0.1" level="project" />
