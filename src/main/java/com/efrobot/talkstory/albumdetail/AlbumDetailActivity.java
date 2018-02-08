@@ -240,6 +240,9 @@ public class AlbumDetailActivity extends WithPlayerBaseActivity implements View.
         //下拉刷新
         page = 1;
         list.clear();
+        if (detailListAdapter != null) {
+            detailListAdapter.notifyDataSetChanged();
+        }
         getHttpData();
         pullToRefreshLayout.refreshFinish(PullToRefreshLayout.SUCCEED);
     }
